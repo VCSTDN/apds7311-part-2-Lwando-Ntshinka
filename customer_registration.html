@@ -1,0 +1,35 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Banking International</title>
+		<link href="stylesheet.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+	</head>
+<body ng-app="banking_international">
+  <nav>
+    <ul>
+      <li><a href="#!/">Home</a></li>
+      <li><a href="#!/login">Login</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div ng-view></div>
+  </div>
+
+  
+  <div type="text/ng-template" id="register.html">
+    <h2>Customer Registration</h2>
+    <form ng-submit="register()">
+      <input type="text" ng-model="user.fullName" placeholder="Full Name" required>
+      <input type="text" ng-model="user.idNumber" placeholder="ID Number" required>
+      <input type="text" ng-model="user.accountNumber" placeholder="Account Number" required>
+      <input type="password" ng-model="user.password" placeholder="Password" required>
+      <button type="submit">Register</button>
+    </form>
+  </div>
+
+  
+</body></html>

@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Banking International</title>
+		<link href="stylesheet.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+	</head>
+<body ng-app="banking_international">
+  <nav>
+    <ul>
+      <li><a href="#!/">Home</a></li>
+      <li><a href="#!/login">Login</a></li>
+      <li><a href="#!/payment">International Payment</a></li>
+      <li><a href="#!/customer_registration">Customer Registration</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div ng-view></div>
+  </div>
+
+  <div type="text/ng-template" id="employee.html">
+    <h2>Employee Portal</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="transaction in transactions">
+          <td>{{transaction.id}}</td>
+          <td>{{transaction.amount}}</td>
+          <td>{{transaction.currency}}</td>
+          <td>{{transaction.status}}</td>
+          <td>
+            <button ng-click="verifyTransaction(transaction)" ng-if="transaction.status === 'Pending'">Verify</button>
+            <button ng-click="submitToSwift(transaction)" ng-if="transaction.status === 'Verified'">Submit to SWIFT</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

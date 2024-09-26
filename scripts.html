@@ -1,0 +1,80 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Global Banking App</title>
+		<link href="stylesheet.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+	</head>
+<body ng-app="banking_international">
+	<script>
+	      var app = angular.module('bankingApp', ['ngRoute']);
+
+    app.config(function($routeProvider) {
+      $routeProvider
+      .when('/', {
+        template: '<h1>Welcome to Global Banking App</h1>'
+      })
+      .when('/register', {
+        templateUrl: 'register.html',
+        controller: 'RegisterCtrl'
+      })
+      .when('/login', {
+        templateUrl: 'login.html',
+        controller: 'LoginCtrl'
+      })
+      .when('/payment', {
+        templateUrl: 'payment.html',
+        controller: 'PaymentCtrl'
+      })
+      .when('/employee', {
+        templateUrl: 'employee.html',
+        controller: 'EmployeeCtrl'
+      });
+    });
+
+    app.controller('RegisterCtrl', function($scope) {
+      $scope.register = function() {
+        // Implement registration logic
+        console.log('Registration:', $scope.user);
+      };
+    });
+
+    app.controller('LoginCtrl', function($scope) {
+      $scope.login = function() {
+        // Implement login logic
+        console.log('Login:', $scope.credentials);
+      };
+    });
+
+    app.controller('PaymentCtrl', function($scope) {
+      $scope.currencies = ['USD', 'EUR', 'GBP', 'JPY'];
+      $scope.providers = ['SWIFT', 'SEPA', 'Fedwire'];
+      
+      $scope.makePayment = function() {
+        // Implement payment logic
+        console.log('Payment:', $scope.payment);
+      };
+    });
+
+    app.controller('EmployeeCtrl', function($scope) {
+      $scope.transactions = [
+        { id: 1, amount: 1000, currency: 'USD', status: 'Pending' },
+        { id: 2, amount: 5000, currency: 'EUR', status: 'Verified' },
+        { id: 3, amount: 2000, currency: 'GBP', status: 'Submitted' }
+      ];
+      
+      $scope.verifyTransaction = function(transaction) {
+        transaction.status = 'Verified';
+      };
+      
+      $scope.submitToSwift = function(transaction) {
+        transaction.status = 'Submitted';
+      };
+    });
+  
+	  
+	  
+	</script>
+</body></html>

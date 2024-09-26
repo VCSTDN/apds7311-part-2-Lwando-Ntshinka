@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Banking International</title>
+		<link href="stylesheet.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+	</head>
+<body ng-app="banking_international">
+  <nav>
+    <ul>
+      <li><a href="#!/">Home</a></li>
+      <li><a href="#!/register">Register</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div ng-view></div>
+  </div>
+
+  <div type="text/ng-template" id="payment.html">
+    <h2>International Payment</h2>
+    <form ng-submit="makePayment()">
+      <input type="number" ng-model="payment.amount" placeholder="Payment Amount" required>
+      <select ng-model="payment.currency" required>
+        <option value="">Select Currency</option>
+        <option ng-repeat="currency in currencies" value="{{currency}}">{{currency}}</option>
+      </select>
+      <select ng-model="payment.provider" required>
+        <option value="">Select Payment Provider</option>
+        <option ng-repeat="provider in providers" value="{{provider}}">{{provider}}</option>
+      </select>
+      <input type="text" ng-model="payment.recipientAccount" placeholder="Recipient's Account Information" required>
+      <input type="text" ng-model="payment.swiftCode" placeholder="SWIFT Code" required>
+      <button type="submit">Pay Now</button>
+    </form>
+  </div>
+
+</body></html>
