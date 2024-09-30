@@ -6,6 +6,7 @@ const path = require('path');
 const mongoose = require ('mongoose')
 const Item = require('Model/Customer');
 const cors = require('cors') 
+const make_payment = require('/MakePayment')
 
 //Database imports
 const database = ('./Database/database')
