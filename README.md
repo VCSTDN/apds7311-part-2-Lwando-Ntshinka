@@ -44,39 +44,76 @@
     font-weight: bold;
   }
   
-  h1, h2 {
+  #, ## {
     color: var(--dark_blue);
   }
 </style>
-<h1>APDS 7311 Task 1- Banking International</h1>
-
-<h2>Table of Contents</h2>
+#APDS 7311 Task 1- Banking International
 
 
-<h2>Contributers</h2>
+##Table of Contents
 
 
-
-<h2>Description</h2>
-
-
-
-
-<h2>Requirements</h2>
+##Contributers
+    -Lesedi Maela
+    -Christian Lombo
+    -Ratjatji Malatji
+    -Nqobile Sibiya
+    -Olifile Seilane
+    -Lwando Ntshinka
 
 
 
+##Description
+Banking International is a customer oriented banking that prioritises security for users when paming international transactions. Users are able to login and view previous payments and make payments that will be approved by the bank employees. 
+
+The following security measures have been taken into consideration for the appliation:
+  - Load Balancing
+  - Rate Limiting
+  - TLS Encryption
+  - Pasword hashing
+  - Session token generation
+  - Password hashing and salting
+  - SSL Digital Certificates
 
 
-<h2>Intructions</h2>
+##Requirements
+The following is required to ensure that the application will function as intented:
+i5 or Equivalent CPU
+8GB RAM
+MB Storage
+Visual studio code
 
 
 
+##Intructions
+The project comprises of various folders that can be run on a browser. The default port for the application is 433. The alternative port is 8443
 
 
+##References
+Anthropic. (2024). Conversation with Claude AI assistant. [Online]. Available at:</br> https://claude.ai/new [Accessed: 16 September 2024].
 
+Bito. [s.a.]. Sanitize Input Javascript: Javascript Explained, [s.a.]. [Online]. Available at:</br> https://bito.ai/resources/sanitize-input-javascript-javascript-explained/ [Accessed: 30 September 2024]. </br></br>
 
+Dev. 2021. How to make a loading screen for an iframe using functional components in React , 14 November 2021. [Online].</br> Available at: https://dev.to/apc518/how-to-make-a-loading-screen-for-an-iframe-using-functional-components-in-react-2970 [Accessed: 30 September 2024]. </br></br>
 
+Geeks for Geeks. 2021. Node.js Securing Apps with Helmet.js, 8 October 2021. [Online]. Available at:</br> https://www.geeksforgeeks.org/node-js-securing-apps-with-helmet-js/ [Accessed: 5 October 2024]. </br></br>
 
+Helmet.js. [s.a.] Get started, [s.a.]. [Online] Available at:</br> https://helmetjs.github.io/ [Accessed: 5 October 2024]. </br></br>
 
+Medium. 2018. Rate limiting, brute force and DDoS attacks protection in Node.js, 4 June 2018. [Online]. Available at: https://medium.com/@animirr/rate-limiting-brute-force-and-ddos-attacks-protection-in-node-js-2492c4a9249 [Accessed: 30 September 2024]. </br></br>
 
+Medium. 2021. Load balancing your NodeJS app with NGINX and PM2, 5 November 2021. [Online]. Available at: https://bencoderus.medium.com/load-balancing-your-nodejs-server-with-nginx-and-pm2-8095f558da2e [Accessed: 30 September 2024]. </br></br>
+
+MongoDB. https://www.mongodb.com/docs/atlas/atlas-ui/documents/
+
+OpenAI. 2024. Chat-GPT (Version 4.0). [Large language model]. Available at:</br>
+https://chat.openai.com/ [Accessed: 30 August 2024].
+
+Open Classroom. Go Full-Stack With Node.js, Express, and MongoDB, 21 February 2022. [Online].</br> Available at:  https://openclassrooms.com/en/courses/5614116-go-full-stack-with-node-js-express-and-mongodb/5656221-save-and-retrieve-data [Accessed: 16 September 2024]. </br></br>
+
+Quora. [s.a.].  How do you get user info from MongoDB in Node.js (node.js, MongoDB, development), [s.a.]. [Online]. Available at: https://www.quora.com/How-do-you-get-user-info-from-MongoDB-in-Node-js-node-js-MongoDB-development [Accessed: 30 September 2024]. </br></br>
+
+StackOverflow. 2023. How to get a particular user data from MongoDB in node.js, 2023. [Online].</br> Available at: https://stackoverflow.com/questions/75217026/how-to-get-a-particular-user-data-from-mongodb-in-node-js [Accessed: 30 September 2024]. </br></br>
+
+StackOverflow. 2009. Generate random string/characters in JavaScript, 28 August 2009. [Online].</br> Available at: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript [Accessed: 30 September 2024]. </br></br>
