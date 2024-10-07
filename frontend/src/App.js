@@ -1,12 +1,13 @@
 //Imports
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './views/stylesheet.css'; //imported CSS
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import './views/stylesheet.css' //imported CSS
 
 // Components (assuming you have these components created)
-import Login from './Login';
-import CustomerViewPayments from './Customer/customerViewPayments';
-import EmployeeViewPayments from './Employee/employeeViewPayments';
+import Login from './components/login'
+import Register from './components/register'
+import CustomerViewPayments from './components/Customer/customerViewPayments'
+import EmployeeViewPayments from './components/Employee/employeeViewPayments'
 
 //Implement IFrames
 // IFrame Component for embedding external pages
@@ -30,9 +31,9 @@ function App() {
     <Router>
       <Routes> 
         <Route path='/login' element={<Login/>}/>
-        <Route path='./Customer/customerViewPayments' element={<customerViewPayments/>}/>
+        <Route path='./Customer/customerViewPayments' element={<CustomerViewPayments/>}/>
         <Route path='./Customer/makePayment' element={<makePayments/>}/>
-        <Route path='/Employee/employeeViewPayments' element={<employeeViewPayments/>}/>
+        <Route path='/Employee/employeeViewPayments' element={<EmployeeViewPayments/>}/>
         <Route path='/Employee/verifyPayments' element={<employeeViewPayments/>}/>
         <Route path='/external' element={<IFrameComponent src="https://example.com"/>}/>
          {/* Add IFrame route here */}

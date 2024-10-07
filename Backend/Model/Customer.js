@@ -1,3 +1,6 @@
+
+
+
 class customer {
     constructor(customerID, customerName, customerSurname, 
                 customerAccountNo, customerPassword)

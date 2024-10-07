@@ -1,6 +1,7 @@
-import React, {useState} from "react";
-import axios from "axios";
+import React, {useState} from "react"
+import axios from "axios"
 import { response } from '/../backend/app'
+import './stylesheet.css'  // Import CSS file here
 
 const makePayment = () =>{
     const [payment, setPayment] = useState({
@@ -27,7 +28,7 @@ const makePayment = () =>{
                 alert(response.data.message)
             })
             .catch(error =>{
-                console.error('An error adding blog', error)
+                console.error('Error when making payments', error)
             })
     }
     return(

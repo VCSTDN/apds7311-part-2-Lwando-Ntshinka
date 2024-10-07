@@ -1,30 +1,44 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { response } from '/../backend/app'
+import './stylesheet.css';  // Import CSS file here
 
-const verifyPayment = () =>{
-    const [title, setTitle] = useState('')
-    const [post, setPost] = useState ('')
+const VerifyPayment = () => {
+    const [title, setTitle] = useState('');
+    const [post, setPost] = useState('');
 
     const handleVerifyPayment = (e) => {
-        e.preventDefault()
-        axios.post('https://127.0.0.1:433/make_payment', {
+        e.preventDefault();
+        axios.post('https://127.0.0.1:1000/verify_payment', {
             title, post
-        }, {headers: {
-            'Authorisation': `Bearer ${localStorage.getItem('token')}`
+        }, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         })
-            .then(response => {
-                alert(response.data.message)
-            })
-            .catch(error =>{
-                console.error('An error adding blog', error)
-            })
-    }
-    return(
-    <form onSubmit={handleVerifyPayment}>
+        .then(response => {
+            alert(response.data.message);
+        })
+        .catch(error => {
+            console.error('An error occurred while processing payment', error);
+        });
+    };
 
-    </form>)
-}
+    return (
+        <form onSubmit={handleVerifyPayment}>
+        <div>
+        <div className="container">
+        <h2>Verify Payment</h2>
+            <label>Title</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div>
+            <label>Details</label>
+            <input type="text" value={post} onChange={(e) => setPost(e.target.value)} />
+        </div>
+        <button type="submit">Verify Payment</button>
+        </div>
+    </form>
+    );
+};
 
-export default verifyPayment
+export default VerifyPayment;

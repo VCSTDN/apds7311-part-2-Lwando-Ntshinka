@@ -43,7 +43,7 @@
     font-weight: bold;
   }
   
-  h1, h2 {
+  .heading1, .heading2 {
     color: var(--dark_blue);
   }
   
@@ -94,3 +94,4 @@
     background-color: var(--pale_blue);
     color: white;
   }
+

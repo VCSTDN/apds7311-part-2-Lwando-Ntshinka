@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from "react";
-import axios from "axios";
-import { response } from "/../backend/app";
+import React, {useEffect, useState} from "react"
+import axios from "axios"
+import { response } from "/../backend/app"
+import './stylesheet.css'  // Import CSS file here
 
 const customerViewPayments = () => {
     const [transactions, setTransactions] = useState([]);

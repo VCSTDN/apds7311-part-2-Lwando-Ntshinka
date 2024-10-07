@@ -1,23 +1,34 @@
 //Import 
 //#region Imports
-const helmet = require ("helmet")
-const https = require('https')
 const express = require('express')
 const bodyParser = require('body-parser')
-const path = require('path')
-const fs = require('fs')
-const mongoose = require ('mongoose')
-const cors = require('cors') 
+const helmet = require ('helmet')
+const https = require('https')
 const rateLimit = require('express-rate-limit') //Rate Limiting
 const { check, validationResult } = require('express-validator') //Input sanitization
+const fs = require('fs')
+
+//Customer and Employee imports
+const ExpressBrute = require('express-brute')
+const store = new ExpressBrute.MemoryStore()
+const brute = new ExpressBrute(store)
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+
+//Payment imports
+const path = require('path')
+const mongoose = require ('mongoose')
+const cors = require('cors') 
 //#endregion
 
 //#region  Import Classes
 const Payment = require('./model/Make_Payment')
 const Employee = require('./model/Employee')
+const checkAuthentication = require('./database/checkAuthentication.js')
 //#endregion
 
 //#region  Database imports
+const { client } = require('./database/database')
 const database = require('./database/database')
 const { MongoClient, ObjectId } = require('mongodb')
 const { connect } = require('http2')
@@ -92,25 +103,102 @@ database.database_connect()
 .catch((err) => console.error('app.js: Failed to connect to the database:', err))
 //#endregion
 
-//#region Employee 
+//#region Customer Requests
+// Signup Route
+app.post('/signup', bruteForce.prevent, async (req, res) => {
+    try {
+        // Hashing and salting the password
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
+        
+        // Creating the user model with the hashed password
+        let userModel = {
+            id: req.body.id,
+            name: req.body.name,
+            surname: req.body.surname,
+            email: req.body.email,
+            accountnumber: req.body.accountnumber,
+            password: hashedPassword // Store the hashed password
+        }
+
+        const collection = await db.collection('customers')
+        const result = await collection.insertOne(userModel)   
+        res.status(201).send(result)
+        console.log(`Password for user ${req.body.email} hashed successfully`)
+
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({ message: 'Error during signup' })
+    }
+})
+
+// Login Route
+app.post('/login', brute.prevent, async (req, res) => {
+// Updated regex pattern: at least 4 characters, at least one special character
+const passwordRegex = /^(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,}$/;
+const collection = db.collection('Customers');
+
+try {
+    const user = {
+        email: req.body.email,
+        password: req.body.password
+    }        
+
+    // Check if the password meets the regex requirements
+    if (passwordRegex.test(user.password)) {
+        // Attempt to find the user in the database
+        const existingUser = await collection.findOne({ email: user.email })
+
+        if (existingUser) {
+
+           const passwordMatch = await bcrypt.compare(user.password, existingUser.password)           
+
+            if (passwordMatch) {
+                const generatedToken = jwt.sign({ email: req.body.email }, "SecretThing", { expiresIn: "20m"})
+                res.status(200).json({ message: 'Login successful', token: generatedToken, email: req.body.email })
+                console.log("Token is: ", generatedToken)
+            } else {
+                // Password doesn't match
+                res.status(401).json({ message: 'Incorrect email or password' })
+            }
+        } else {
+            // User doesn't exist
+            res.status(404).json({ message: 'Incorrect email or password' })
+        }
+    } else {
+        // Password doesn't meet regex requirements
+        res.status(400).json({ message: 'Invalid password format' })
+    }
+} catch (e) {
+    console.error('Error occurred during login: ', e);
+    res.status(500).json({ message: 'Internal server error' })
+}
+})
+//#endregion
+
+//#region Employee Requests
 app.post('/secure_login', 
     [ // Input sanitization and validation
         check('email').isEmail().withMessage('Invalid email format'),
         check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    ],
+    ], brute.prevent, 
     async (req, res) => {
+
+        
         const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     Employee.login_employee(req, res); // Call Employee class logic
-    });
 
+
+    });
 
 //#endregion
 
 //#region Payments
-//Employee View Payments for Users
+
+//#region Customer Payments
+
 //Customer- Make Payment
 app.post('/make_payment',
     [   //Input Sanitisation
@@ -118,7 +206,7 @@ app.post('/make_payment',
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
         check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code')
-      ],
+      ], checkAuthentication,
         async(req, res)=>{
 
 
@@ -144,12 +232,42 @@ app.post('/make_payment',
     }
 })
 
+//Customer- View Payments
+app.get('/:cust_id/payment_details', checkAuthentication,
+    //Input Sanitation
+    [check('cust_id').isMongoId().withMessage('Invalid customer ID')],
+    async (req, res) => {
+        
+        try {
+            ////Get Customer ID to view details
+            const cust_id = req.params.cust_id
+            const result = await Make_Payment.view_user_payments(cust_id); //Fetch all payments
+            res.status(200).json(result) //Send payment List
 
-app.get('/view_banking_details',
+            //Access database
+            //const paymentDatabase = database.db(databaseName)
+            //const collection = database.getDb().collection(paymentCollection)
+  
+            //Access payments table  
+            //const payment = await collection.find( { custId: req.params.custId })
+            //res.status(200).json(collection.filter((customer) => customer.custId === req.params.custId))
+            //console.log(collection.filter((customer) => customer.custId === req.params.custId))
+        }
+
+        catch (error) {
+            console.error('app.js: Error when attempting to retrieve customer payment details: ', error)
+            res.status(500).send('Internal Server Error')
+        }
+    })
+//#endregion
+
+//#region Employee Payments
+
+//Employee View Payments for Users
+app.get('/view_banking_details', checkAuthentication,
     async(req, res) =>{
 
     try{
-        //const viewPayments = new Payment()
         const result = await Make_Payment.view_all_payments(); //Fetch all payments
         res.status(200).json(result) //Send payment List
 
@@ -166,44 +284,14 @@ app.get('/view_banking_details',
     }
     })
 
-
-//Review this code
-//Customer- View Payments
-app.get('/:cust_id/payment_details',
-    //Input Sanitation
-    [check('cust_id').isMongoId().withMessage('Invalid customer ID')],
-    async (req, res) => {
-        try {
-            const paymentDatabase = database.database_connect() //Access database
-            const viewPayments = new Payment()
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() })
-            }
-
-            //Get Customer ID to view details
-            const cust_id = req.params.cust_id
-            const collection = database.getDb().collection(paymentCollection)
-  
-            //Access payments table  
-            const payment = await collection.find( { custId: req.params.custId })
-            res.status(200).json(collection.filter((customer) => customer.custId === req.params.custId))
-            console.log(collection.filter((customer) => customer.custId === req.params.custId))
-        }
-
-        catch (error) {
-            console.error('Error when attempting to retrieve customer payment details: ', error)
-            res.status(500).send('Internal Server Error')
-        }
-    })
-
 //Update payment status
-app.patch('/verify_payment/:paymentID', async (req, res) =>{ 
+app.patch('/verify_payment/:paymentID',  checkAuthentication,
+    check('payID').isMongoId().withMessage('Invalid customer ID'),
+    async (req, res) =>{ 
     try {
-        const paymentID = req.params.paymentID;
-        const payment = new Payment();
-        const result = await payment.verify_payment(paymentID);
-        res.status(200).json(result);
+        const paymentID = req.params.paymentID
+        const result = await Make_Payment.verify_payment(paymentID)
+        res.status(200).json(result)
     }
 
     catch (error) {
@@ -211,6 +299,8 @@ app.patch('/verify_payment/:paymentID', async (req, res) =>{
         res.status(500).send('Internal Server Error');
     }
 })
+//#endregion
+
 //#endregion
 
 module.exports= app

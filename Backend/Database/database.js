@@ -25,10 +25,8 @@ else{
 const client = new MongoClient(connstring, { useNewUrlParser: true, useUnifiedTopology: true })
 
 async function database_connect() {
-    //Attempt to connect to MongoDB
-    //client = new MongoClient('mongodb://localhost:433')
+        //Attempt to connect to MongoDB
         try {
-            //this.client = await MongoClient.connect(process.env.MONGO_URI)
             await client.connect(); // Ensure you're connecting properly
             db = client.db()
             console.log('database.js: MongoDB Atlas connected successfully')
@@ -39,8 +37,6 @@ async function database_connect() {
             throw error
             return null
         }
-    
-    
 }
 
 function getDb () {
@@ -49,27 +45,5 @@ function getDb () {
     }
     return db;
 }
-
-//Check Authentication pass in reuqests
-const checkauth = (req, res, next) => {
-    const token = req.header.authorization.split(' ')[1]
-
-    if (!token) {
-        return res.status(401).json({ message: 'Session Timed Out' });
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = decoded; // Attach decoded token info to request
-        next()
-    }
-    catch (error) {
-        res.status(401).json({ message: 'Please login to access- invalid token' })
-        //Redirect to Login page
-        console.error(error)
-    }
-}
-
-////Call Connect function
-//database_connect();
 
 module.exports = { database_connect }

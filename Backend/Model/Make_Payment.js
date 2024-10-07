@@ -6,8 +6,6 @@ const databaseName = 'Banking_International'
 const paymentCollection = 'Payments'
 
 
-
-
 class Make_Payment {
     constructor(paymentID, paymentAmount, paymentCurrency, SWIFTNo)
     {
@@ -39,8 +37,8 @@ class Make_Payment {
         
     }
 
+    //#region Customer Payment Transactions
     static async make_payment(paymentData) { //Post Request for Customers
-        
         try {
             await this.initialiseDatabase() //Initialise database
 
@@ -75,21 +73,19 @@ class Make_Payment {
             const db = this.client.db('Banking_International')
             const collection = db.collection('Payments');
 
-            const result = await this.collection.find({custID}).toArray() //Get payments
+            const result = await collection.find({ custID }).toArray() //Get payments
             return result
         }
 
         catch (error)
         {
-            console.error('Error when fetching payments (in view_user_payments):', error);
+            console.error('Make_Payments.js: Error when fetching payments (in view_user_payments):', error);
             throw error
         }
-        finally {
-            await client.close(); //Close Conenction
-        }
-
     }
+    //#endregion
 
+    //#region Employee Payment Transactions
     //Get Request for Employees
     static async view_all_payments(){ 
         
@@ -97,7 +93,7 @@ class Make_Payment {
             //Initialise database
             await this.initialiseDatabase()
             const db = this.client.db('Banking_International')
-            const collection = db.collection('Payments');
+            const collection = db.collection('Payments')
 
 
             const result = await collection.find({}).toArray() //Get payments
@@ -111,15 +107,15 @@ class Make_Payment {
         }
     }
 
-
-
     static async verify_payment(paymentID){ //Patch Request for Employees
         try {
-
-            await this.initialiseDatabase() //Initialise database
+            //Initialise database
+            await this.initialiseDatabase() 
+            const db = this.client.db('Banking_International')
+            const collection = db.collection('Payments')
 
             //Locate payment and update status
-            const result = await this.collection.updateOne(
+            const result = await collection.updateOne(
                 { paymentID: new ObjectId(paymentID) },
                 { $set: { paymentStatus: 'approved' } }
             );
@@ -130,12 +126,12 @@ class Make_Payment {
                 return { status: 'fail', message: 'Payment not found' };
               }
         } catch (error) {
-            console.error('Error verifying payment:', error);
+            console.error('app.js: Error verifying payment:', error);
             throw error;
         }
     
     }
-
+    //#endregion
 }
 
 
