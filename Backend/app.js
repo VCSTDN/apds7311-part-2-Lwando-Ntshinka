@@ -105,7 +105,7 @@ database.database_connect()
 
 //#region Customer Requests
 // Signup Route
-app.post('/signup', bruteForce.prevent, async (req, res) => {
+app.post('/signup', brute.prevent, async (req, res) => {
     try {
         // Hashing and salting the password
         const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
@@ -202,7 +202,7 @@ app.post('/secure_login',
 //Customer- Make Payment
 app.post('/make_payment',
     [   //Input Sanitisation
-        //check('custID').isMongoId().withMessage('Invalid customer ID'),
+        check('custID').isMongoId().withMessage('Invalid customer ID'),
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
         check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code')
