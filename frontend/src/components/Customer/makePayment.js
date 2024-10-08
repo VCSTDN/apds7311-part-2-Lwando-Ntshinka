@@ -1,9 +1,9 @@
 import React, {useState} from "react"
 import axios from "axios"
-import { response } from '/../backend/app'
-import './stylesheet.css'  // Import CSS file here
+//import { response } from '/../backend/app'
+import stylesheet from '../stylesheet.css'  // Import CSS file here
 
-const makePayment = () =>{
+const UseMakePayment = () =>{
     const [payment, setPayment] = useState({
         amount: "",
         currency: "",
@@ -19,7 +19,7 @@ const makePayment = () =>{
 
     const handleSubmitPayment = (e) => {
         e.preventDefault()
-        const response = axios.post('https://127.0.0.1:433/make_payment', payment, 
+        const response = axios.post('https://127.0.0.1:3000/make_payment', payment, 
         {headers: {
             'Authorisation': `Bearer ${localStorage.getItem('token')}`
             }
@@ -83,4 +83,4 @@ const makePayment = () =>{
       </div>)
 }
 
-export default makePayment
+export default UseMakePayment

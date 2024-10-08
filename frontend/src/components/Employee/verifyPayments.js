@@ -1,14 +1,16 @@
-import React, { useState } from "react";
-import axios from "axios";
-import './stylesheet.css';  // Import CSS file here
+import React, { useState } from "react"
+import axios from "axios"
+import { useParams } from 'react-router-dom'
+import stylesheet from '../stylesheet.css'
 
-const VerifyPayment = () => {
+const UseVerifyPayment = () => {
     const [title, setTitle] = useState('');
     const [post, setPost] = useState('');
+    
 
     const handleVerifyPayment = (e) => {
         e.preventDefault();
-        axios.post('https://127.0.0.1:1000/verify_payment', {
+        axios.post('https://127.0.0.1:3000/verify_payment', {
             title, post
         }, {
             headers: {
@@ -41,4 +43,4 @@ const VerifyPayment = () => {
     );
 };
 
-export default VerifyPayment;
+export default UseVerifyPayment

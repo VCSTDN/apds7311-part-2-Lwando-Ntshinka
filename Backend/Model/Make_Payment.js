@@ -1,5 +1,6 @@
 const database = require("../database/database")
 const { MongoClient } = require('mongodb')
+const databaseFile = require('../Database/database')
 
 //Variable declaration
 const databaseName = 'Banking_International'
@@ -13,6 +14,7 @@ class Make_Payment {
         //this.collection = null;
         this.client = null
         this.paymentID = paymentID
+        this.payID = async () => await require('../database/database')('PAY', 'Payments')
         this.paymentAmount = paymentAmount
         this.paymentCurrency = paymentCurrency
         this.SWIFTNo = SWIFTNo
@@ -24,7 +26,7 @@ class Make_Payment {
         try{
             if(!this.client){
                 //Initialise database
-                this.client = await require('../database/database').database_connect()
+                this.client = await require('../Database/database').database_connect()
                 console.log("Make_Payment.js: Database client initialized successfully")
             }
             //this.collection = this.client.db(databaseName).collection(paymentCollection);

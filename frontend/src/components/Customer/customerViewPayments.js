@@ -1,20 +1,23 @@
 import React, {useEffect, useState} from "react"
-import axios from "axios"
-import { response } from "/../backend/app"
-import './stylesheet.css'  // Import CSS file here
+import axios from 'axios'
+//import { response } from "/../backend/app.js"
+import stylesheet from '../stylesheet.css'
+import { useParams } from 'react-router-dom';
 
-const customerViewPayments = () => {
-    const [transactions, setTransactions] = useState([]);
+function UseCustomerViewPayments() {
+    const [payments, setPayments] = useState([])
+    const { custID } = useParams();
 
   useEffect(() => {
-    axios.get('https://127.0.0.1:433/:CUS001/payment_details')
+    const token = localStorage.getItem('token');
+    axios.get('https://127.0.0.1:433/${custID}/payment_details', {headers: { Authorization: `Bearer ${token}` }})
       .then(response => {
-        setTransactions(response.data);
+        setPayments(response.data);
       })
       .catch(error => {
         console.error('Error fetching customer transactions:', error);
       });
-  }, []); //return/store as an array
+  }, [custID]); //return/store as an array
 
     return(
         <div className="container">
@@ -29,12 +32,12 @@ const customerViewPayments = () => {
           </tr>
         </thead>
         <tbody>
-          {transactions.map((transaction, index) => (
+          {payments.map((transaction, index) => (
             <tr key={index}>
-              <td>{transaction._id}</td>
-              <td>{transaction.amount}</td>
-              <td>{transaction.currency}</td>
-              <td>{transaction.status}</td>
+              <td>{payments._id}</td>
+              <td>{payments.amount}</td>
+              <td>{payments.currency}</td>
+              <td>{payments.status}</td>
             </tr>
           ))}
         </tbody>
@@ -43,4 +46,4 @@ const customerViewPayments = () => {
     )
 
 }
-export default customerViewPayments
+export default UseCustomerViewPayments

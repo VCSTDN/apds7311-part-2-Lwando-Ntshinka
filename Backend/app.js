@@ -33,12 +33,16 @@ const database = require('./database/database')
 const { MongoClient, ObjectId } = require('mongodb')
 const { connect } = require('http2')
 const Make_Payment = require('./model/Make_Payment')
+const { markAsUntransferable } = require('worker_threads')
 //#endregion
 
 //#region  Declare Variables
 const port = process.env.PORT || 8443 // Default to port 8443 if port 443 is in use
 const databaseName = 'Banking_International'
 const paymentCollection = 'Payments'
+const customerCollection = 'Customers'
+const employeeCollection = 'Payments'
+const tokens = {}; // Initialize token storage for development purposes
 //#endregion
 
 //#region  Create Server
@@ -53,6 +57,7 @@ if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) { //Check
   console.error('SSL key or certificate not found')
   process.exit(1);
 }
+
 const isProduction = process.env.NODE_ENV === 'production' //Initialise server
 if (isProduction) {
     const server = https.createServer({
@@ -60,7 +65,7 @@ if (isProduction) {
           cert: fs.readFileSync(path.resolve(certificatePath))
       }, app);
       server.listen(port, () => {
-        console.log(`server started on port ${port}`);
+        console.log(`server started on port ${port} with SSL`);
       });
     } else {
       app.listen(port, () => {
@@ -101,9 +106,22 @@ app.use(limiter)
 database.database_connect()
 .then(() => console.log('app.js: Database is connected successfully!'))
 .catch((err) => console.error('app.js: Failed to connect to the database:', err))
+
+
+function generateToken(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
 //#endregion
 
-//#region Customer Requests
+//#region Customer Regisetr and Customer & Employee LoginRequests
 // Signup Route
 app.post('/signup', brute.prevent, async (req, res) => {
     try {
@@ -113,6 +131,7 @@ app.post('/signup', brute.prevent, async (req, res) => {
         // Creating the user model with the hashed password
         let userModel = {
             id: req.body.id,
+            custID: req.body.custID,
             name: req.body.name,
             surname: req.body.surname,
             email: req.body.email,
@@ -120,7 +139,10 @@ app.post('/signup', brute.prevent, async (req, res) => {
             password: hashedPassword // Store the hashed password
         }
 
-        const collection = await db.collection('customers')
+        //Declare Database
+        this.client = await require('./database/database.js').database_connect()
+        const db = this.client.db('Banking_International')
+        const collection = await db.collection('Customers')
         const result = await collection.insertOne(userModel)   
         res.status(201).send(result)
         console.log(`Password for user ${req.body.email} hashed successfully`)
@@ -134,8 +156,13 @@ app.post('/signup', brute.prevent, async (req, res) => {
 // Login Route
 app.post('/login', brute.prevent, async (req, res) => {
 // Updated regex pattern: at least 4 characters, at least one special character
-const passwordRegex = /^(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,}$/;
-const collection = db.collection('Customers');
+const passwordRegex = /^(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,}$/
+
+//Initialise Database
+this.client = await require('./database/database.js').database_connect()
+const db = this.client.db(databaseName)
+const mongoCustomersCollection = await db.collection(customerCollection)
+const mongoEmployeesCollection = await db.collection(employeeCollection)
 
 try {
     const user = {
@@ -145,17 +172,33 @@ try {
 
     // Check if the password meets the regex requirements
     if (passwordRegex.test(user.password)) {
-        // Attempt to find the user in the database
-        const existingUser = await collection.findOne({ email: user.email })
 
-        if (existingUser) {
+        // Attempt to find the user in the database
+        const existingCustomer = await mongoCustomersCollection.findOne({ email: user.email })
+        let userType = customerCollection
+        const existingUser = existingCustomer || existingEmployee
+
+        if(!existingCustomer)
+        {
+            const existingEmployee = await mongoEmployeesCollection.findOne({ email: user.email })
+            userType = employeeCollection
+        }
+
+        //If user is present
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        else if (existingUser) {
 
            const passwordMatch = await bcrypt.compare(user.password, existingUser.password)           
 
             if (passwordMatch) {
+
                 const generatedToken = jwt.sign({ email: req.body.email }, "SecretThing", { expiresIn: "20m"})
                 res.status(200).json({ message: 'Login successful', token: generatedToken, email: req.body.email })
-                console.log("Token is: ", generatedToken)
+                console.log("Token is: ", generatedToken) //Delete in ptoduction
+                console.log("User is: ", userType) //Delete in ptoduction
             } else {
                 // Password doesn't match
                 res.status(401).json({ message: 'Incorrect email or password' })
@@ -175,25 +218,6 @@ try {
 })
 //#endregion
 
-//#region Employee Requests
-app.post('/secure_login', 
-    [ // Input sanitization and validation
-        check('email').isEmail().withMessage('Invalid email format'),
-        check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    ], brute.prevent, 
-    async (req, res) => {
-
-        
-        const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    Employee.login_employee(req, res); // Call Employee class logic
-
-
-    });
-
-//#endregion
 
 //#region Payments
 
@@ -202,11 +226,11 @@ app.post('/secure_login',
 //Customer- Make Payment
 app.post('/make_payment',
     [   //Input Sanitisation
-        check('custID').isMongoId().withMessage('Invalid customer ID'),
+        check('_id').isMongoId().withMessage('Invalid customer ID'),
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
         check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code')
-      ], checkAuthentication,
+      ], checkAuthentication, //Check Authentication
         async(req, res)=>{
 
 
@@ -233,9 +257,11 @@ app.post('/make_payment',
 })
 
 //Customer- View Payments
-app.get('/:cust_id/payment_details', checkAuthentication,
+app.get('/:cust_id/payment_details', 
     //Input Sanitation
     [check('cust_id').isMongoId().withMessage('Invalid customer ID')],
+    //Check Authentication
+    checkAuthentication,
     async (req, res) => {
         
         try {
@@ -245,13 +271,13 @@ app.get('/:cust_id/payment_details', checkAuthentication,
             res.status(200).json(result) //Send payment List
 
             //Access database
-            //const paymentDatabase = database.db(databaseName)
-            //const collection = database.getDb().collection(paymentCollection)
+            const paymentDatabase = database.db(databaseName)
+            const collection = database.getDb().collection(paymentCollection)
   
             //Access payments table  
-            //const payment = await collection.find( { custId: req.params.custId })
-            //res.status(200).json(collection.filter((customer) => customer.custId === req.params.custId))
-            //console.log(collection.filter((customer) => customer.custId === req.params.custId))
+            const payment = await collection.find( { custId: req.params.custId })
+            res.status(200).json(collection.filter((customer) => customer.custId === req.params.custId))
+            console.log(collection.filter((customer) => customer.custId === req.params.custId))
         }
 
         catch (error) {
@@ -282,7 +308,7 @@ app.get('/view_banking_details', checkAuthentication,
         console.error('Error when attempting to retrieve payment details', error)
         res.status(500).send('Internal Server Error')
     }
-    })
+    }) 
 
 //Update payment status
 app.patch('/verify_payment/:paymentID',  checkAuthentication,

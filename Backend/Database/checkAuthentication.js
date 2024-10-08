@@ -2,14 +2,29 @@ const jwt = require('jsonwebtoken');
 
 //Check Authentication pass in reuqests
 const checkauth = (req, res, next) => {
-    const token = req.header.authorization.split(' ')[1]
+    const authHeader = req.headers.authorization
 
-    if (!token) {
+
+    if (!authHeader) {
         return res.status(401).json({ message: 'Session Timed Out' });
     }
+    else {
+        const token = authHeader.split('')[1];
+        if (!token || tokens[token]) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+    }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = decoded; // Attach decoded token info to request
+        // Check if the token is expired
+        const tokenData = tokens[token];
+        if (Date.now() > tokenData.expirationTime) {
+            delete tokens[token];  // Clean up expired tokens
+            return res.status(401).json({ message: 'Session expired, please log in again' });
+        }
+
+        //const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        //req.user = decoded; // Attach decoded token info to request
+        req.user = tokenData; // Attach decoded token info to request
         next()
     }
     catch (error) {

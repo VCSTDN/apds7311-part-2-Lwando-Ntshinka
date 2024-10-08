@@ -1,13 +1,14 @@
 //Imports
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import './views/stylesheet.css' //imported CSS
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 
 // Components (assuming you have these components created)
 import Login from './components/login'
 import Register from './components/register'
 import CustomerViewPayments from './components/Customer/customerViewPayments'
+import MakePayments from './components/Customer/makePayment'
 import EmployeeViewPayments from './components/Employee/employeeViewPayments'
+import EmployeeVerifyPayments from './components/Employee/verifyPayments'
 
 //Implement IFrames
 // IFrame Component for embedding external pages
@@ -20,6 +21,7 @@ const IFrameComponent = ({ src }) => {
       style={{ border: 'none' }}
       title="IFrame Example"
       sandbox="allow-scripts allow-same-origin"
+      
     ></iframe>
   );
 };
@@ -30,13 +32,21 @@ function App() {
     /*<!--Add paths to methods in routes-->*/
     <Router>
       <Routes> 
+      <Route path="/" element={<Navigate to="/login" />} /> 
         <Route path='/login' element={<Login/>}/>
-        <Route path='./Customer/customerViewPayments' element={<CustomerViewPayments/>}/>
-        <Route path='./Customer/makePayment' element={<makePayments/>}/>
+        <Route path='/register' element={<Register/>}/>
+
+        {/* Customer Routes */}
+        <Route path='/Customer/:custID/customerViewPayments' element={<CustomerViewPayments/>}/>
+        <Route path='/Customer/makePayment' element={<MakePayments/>}/>
+
+        {/* Employee Routes */}
         <Route path='/Employee/employeeViewPayments' element={<EmployeeViewPayments/>}/>
-        <Route path='/Employee/verifyPayments' element={<employeeViewPayments/>}/>
-        <Route path='/external' element={<IFrameComponent src="https://example.com"/>}/>
+        <Route path='/Employee/verifyPayments' element={<EmployeeVerifyPayments/>}/>
+         
          {/* Add IFrame route here */}
+         <Route path="/external/google" element={<IFrameComponent src="https://www.google.com" />} />
+        <Route path="/external/wikipedia" element={<IFrameComponent src="https://www.wikipedia.org" />} />
       </Routes>
     </Router>
   );

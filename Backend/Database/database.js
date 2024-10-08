@@ -8,8 +8,6 @@ let _db;
 //Load environment variables form .env file
 dotenv.config({ path: path.resolve(__dirname, './.env') })
 
-
-
 //Connection string from environment variable
 const connstring = process.env.ATLAS_URI
 //Check if connection string is available
@@ -18,11 +16,11 @@ if (!connstring) {
     process.exit(1) // Exit the process if connection string is missing
 }
 else{
-    console.log('MongoDB Connection String:', process.env.ATLAS_URI);
+    console.log('MongoDB ATLAS CONNECTED');
 }
 
 //Create Mongo Client
-const client = new MongoClient(connstring, { useNewUrlParser: true, useUnifiedTopology: true })
+const client = new MongoClient(process.env.ATLAS_URI)
 
 async function database_connect() {
         //Attempt to connect to MongoDB
@@ -38,6 +36,22 @@ async function database_connect() {
             return null
         }
 }
+
+// Utility function to generate custom IDs based on the number of entries
+const generateCustomID = async (prefix, collection) => {
+    const counterCollection = db.collection('Counters'); // Counter collection to track sequences
+    const counter = await counterCollection.findOneAndUpdate(
+        { _id: prefix }, // Each prefix (CUSID, EMPID, PAYID) gets its own sequence
+        { $inc: { seq: 1 } }, // Increment sequence number by 1
+        { returnDocument: 'after', upsert: true } // Return updated document, insert if doesn't exist
+    );
+
+    const idNumber = counter.value.seq.toString().padStart(6, '0'); // Pad with leading zeros for 6-digit format
+    return `${prefix}${idNumber}`;
+};
+
+
+
 
 function getDb () {
     if (!db) {

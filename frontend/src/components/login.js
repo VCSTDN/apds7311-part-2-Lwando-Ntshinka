@@ -1,47 +1,64 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-import {useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import stylesheet from '../components/stylesheet.css'
 
 
 //Backend code to run: APDS7311\Programmes\Backend\Auth\user.js
 //Backed code check authentication: APDS7311\Programmes\Backend\index.js
 
-const Login =() => {
+const UseLogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const navigate = useNavigate()
 
-    const handleLogin = (e) =>{
+    const handleLogin = (e) => {
         e.preventDefault()
-        axios.post('https://127.0.0.1.3000/login', {
+
+        axios.post('https://127.0.0.1:433/login', {
             email, password
         })
-        .then((response) => {
-            const token = response.data.token
-            localStorage.setItem('token', token)
-            alert(response.data.message)
-            navigate('/')
-        })
-        .catch(error => {
-            console.error('Login Failed', error)
-            alert('Login attempt Failed, please check your email and password')
-        })
+            .then((response) => {
+                const token = response.data.token
+                const { userType, userId } = response.data;
+                // Store the token in localStorage or sessionStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('userType', userType);
+                localStorage.setItem('userId', userId);
+                alert(response.data.message)
+
+                //Navigate to respective page depending on which user logged in
+                // Redirect based on user type
+                if (userType === 'Customer') {
+                    navigate(`/customer/view-payments/${userId}`);  // Redirect Customer to their payment page
+                } else if (userType === 'Employee') {
+                    navigate(`/employee/view-payments/${userId}`);  // Redirect Employee to their payment page
+                }
+
+            })
+            .catch(error => {
+                console.error('Login Failed', error)
+                alert('Login attempt Failed, please check your email and password')
+            })
     }
 
-    return(
+    return (
         <form onSubmit={handleLogin}>
+            <h1>Login</h1>
             <div>
                 <label>Email</label>
-                <input type='text' value={email} onChange={(e) => setEmail(e.target.value)}/>
+                <input type='text' value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div>
                 <label>Password</label>
-                <input type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                <input type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <button type='submit'>Login</button>
+            <button type='submit' style={{ padding: '10px 20px', margin: '10px' }}>Login</button>
+
+            <button type="button" onClick={() => navigate('/register')} style={{ padding: '10px 20px', margin: '10px' }}>Register</button>
         </form>
     )
 
 }
-export default Login
+export default UseLogin

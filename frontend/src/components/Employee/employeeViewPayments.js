@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from "react"
 import axios from "axios"
-import { response } from "/../backend/app"
-import './stylesheet.css'  // Import CSS file here
+//import { response } from "/../backend/app"
+import stylesheet from '../stylesheet.css'  // Import CSS file here
+import { useParams } from 'react-router-dom';
 
-const customerViewPayments = () => {
+const UseEmployeeViewPayments = () => {
     const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    axios.get('https://127.0.0.1:433/:CUS001/view_banking_details')
+    axios.get('https://127.0.0.1:3000/${empID}/view_banking_details')
       .then(response => {
         setTransactions(response.data);
       })
@@ -47,4 +48,4 @@ const customerViewPayments = () => {
     )
 
 }
-export default customerViewPayments
+export default UseEmployeeViewPayments
