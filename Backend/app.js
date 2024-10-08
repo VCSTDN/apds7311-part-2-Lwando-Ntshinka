@@ -8,14 +8,12 @@ const rateLimit = require('express-rate-limit') //Rate Limiting
 const { check, validationResult } = require('express-validator') //Input sanitization
 const fs = require('fs')
 
-//Customer and Employee imports
 const ExpressBrute = require('express-brute')
 const store = new ExpressBrute.MemoryStore()
 const brute = new ExpressBrute(store)
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
-//Payment imports
 const path = require('path')
 const mongoose = require ('mongoose')
 const cors = require('cors') 
@@ -79,9 +77,13 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors(
     ({
-    origin: '*', // Specify the origin that is allowed
-    credentials: true // Enable cookies or auth headers
+    origin: 'http://localhost:3000', // Specify the origin that is allowed
+    credentials: true, // Enable cookies or auth headers
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Ensure all methods are allowed
+    preflightContinue: false,
+    optionsSuccessStatus: 204
     }))) //Access Make parment Class
+app.options('*', cors()); // Enable pre-flight (OPTIONS) requests for all routes
 app.use(helmet({
     contentSecurityPolicy: {
       directives: {
@@ -111,18 +113,6 @@ database.database_connect()
 .then(() => console.log('app.js: Database is connected successfully!'))
 .catch((err) => console.error('app.js: Failed to connect to the database:', err))
 
-
-function generateToken(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-}
 //#endregion
 
 //#region Customer Regisetr and Customer & Employee LoginRequests
@@ -132,10 +122,10 @@ app.post('/signup', brute.prevent, async (req, res) => {
         // Hashing and salting the password
         const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
         
+        
         // Creating the user model with the hashed password
         let userModel = {
-            id: req.body.id,
-            custID: req.body.custID,
+            custID: req.body.database.generateCustomID('CUS', 'Customers'),
             name: req.body.name,
             surname: req.body.surname,
             email: req.body.email,
@@ -188,11 +178,11 @@ try {
             userType = employeeCollection
         }
 
-        //If user is present
+        //If user is not present
         if (!existingUser) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+        //If user is present, check password
         else if (existingUser) {
 
            const passwordMatch = await bcrypt.compare(user.password, existingUser.password)           
@@ -200,7 +190,12 @@ try {
             if (passwordMatch) {
 
                 const generatedToken = jwt.sign({ email: req.body.email }, "SecretThing", { expiresIn: "20m"})
-                res.status(200).json({ message: 'Login successful', token: generatedToken, email: req.body.email })
+                res.status(200).json({ message: 'Login successful', 
+                                    token: generatedToken, 
+                                    email: req.body.email, 
+                                    userId: req.body.userId,
+                                    _Id: existingUser._id.toString(),
+                                    userType })
                 console.log("Token is: ", generatedToken) //Delete in ptoduction
                 console.log("User is: ", userType) //Delete in ptoduction
             } else {
@@ -275,8 +270,8 @@ app.get('/:cust_id/payment_details',
             res.status(200).json(result) //Send payment List
 
             //Access database
-            const paymentDatabase = database.db(databaseName)
-            const collection = database.getDb().collection(paymentCollection)
+            //const paymentDatabase = database.db(databaseName)
+            //const collection = paymentDatabase.collection(paymentCollection)
   
             //Access payments table  
             const payment = await collection.find( { custId: req.params.custId })

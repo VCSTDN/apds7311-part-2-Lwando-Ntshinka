@@ -25,9 +25,20 @@ const Signup = () => {
             navigate('/login')
         })
         .catch(error => {
-            console.error(`Error creating account ${error}`)
-            alert(`Internal error when creating account ${error}`)
-        })
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                console.error(`Error Response: ${error.response.data}`);
+                alert(`Login Failed: ${error.response.data.message || error.message}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('Error Request:', error.request);
+                alert('Login Failed: No response received from the server.');
+            } else {
+                // Something happened in setting up the request
+                console.error('Error:', error.message);
+                alert(`Login Failed: ${error.message}`);
+        }
+    })
 
     }
 

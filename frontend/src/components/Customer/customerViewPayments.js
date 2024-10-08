@@ -10,7 +10,7 @@ function UseCustomerViewPayments() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`https://127.0.0.1:433/${custID}/payment_details`, {headers: { Authorization: `Bearer ${token}` }})
+    axios.get(`https://localhost:433/${custID}/payment_details`, {headers: { Authorization: `Bearer ${token}` }})
       .then(response => {
         setPayments(response.data);
       })

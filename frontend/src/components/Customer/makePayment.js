@@ -19,7 +19,7 @@ const UseMakePayment = () =>{
 
     const handleSubmitPayment = (e) => {
         e.preventDefault()
-        const response = axios.post('https://127.0.0.1:433/make_payment', payment, 
+        const response = axios.post('https://localhost:433/make_payment', payment, 
         {headers: {
             'Authorisation': `Bearer ${localStorage.getItem('token')}`
             }
@@ -28,7 +28,7 @@ const UseMakePayment = () =>{
                 alert(response.data.message)
             })
             .catch(error =>{
-                console.error('Error when making payments', error)
+                console.error(`Error when making payments', {error}`)
             })
     }
     return(

@@ -38,7 +38,7 @@ async function database_connect() {
 }
 
 // Utility function to generate custom IDs based on the number of entries
-const generateCustomID = async (prefix, collection) => {
+async function  generateCustomID (prefix, collection) {
     const counterCollection = db.collection('Counters'); // Counter collection to track sequences
     const counter = await counterCollection.findOneAndUpdate(
         { _id: prefix }, // Each prefix (CUSID, EMPID, PAYID) gets its own sequence

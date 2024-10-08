@@ -15,20 +15,19 @@ const UseLogin = () => {
     const handleLogin = (e) => {
         e.preventDefault()
 
-        axios.post('https://localhost:433/login', {
-            email, password
-        })
+        axios.post('https://localhost:433/login', { email, password }, { withCredentials: true })
             .then((response) => {
                 const token = response.data.token
-                const { userType, userId } = response.data;
+                const { userType, userId, _Id } = response.data;
+
                 // Store the token in localStorage or sessionStorage
                 localStorage.setItem('token', token);
                 localStorage.setItem('userType', userType);
                 localStorage.setItem('userId', userId);
+                localStorage.setItem('_Id', _Id);
                 alert(response.data.message)
 
                 //Navigate to respective page depending on which user logged in
-                // Redirect based on user type
                 if (userType === 'Customer') {
                     navigate(`/Customer/${userId}/customerViewPayments`);  // Redirect Customer to their payment page
                 } else if (userType === 'Employee') {
@@ -37,9 +36,20 @@ const UseLogin = () => {
 
             })
             .catch(error => {
-                console.error(`Login Failed due to internal error ${error}`)
-                alert(`Login Failed due to internal error ${error}`)
-            })
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    console.error(`Error Response: ${error.response.data}`);
+                    alert(`Login Failed: ${error.response.data.message || error.message}`);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error('Error Request:', error.request);
+                    alert('Login Failed: No response received from the server.');
+                } else {
+                    // Something happened in setting up the request
+                    console.error('Error:', error.message);
+                    alert(`Login Failed: ${error.message}`);
+            }
+        })
     }
 
     return (
