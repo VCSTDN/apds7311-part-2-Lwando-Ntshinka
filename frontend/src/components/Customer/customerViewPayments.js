@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react"
 import axios from 'axios'
-//import { response } from "/../backend/app.js"
 import { useNavigate } from 'react-router-dom'
 import stylesheet from '../stylesheet.css'
 import { useParams } from 'react-router-dom';
@@ -12,12 +11,19 @@ function UseCustomerViewPayments() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`https://localhost:433/payment_details/${custID}`, {headers: { Authorization: `Bearer ${token}` }})
+    axios.get(`https://localhost:433/payment_details/${custID}`, custID, {headers: { Authorization: `Bearer ${token}` }})
       .then(response => {
         setPayments(response.data);
       })
       .catch(error => {
-        console.error('Error fetching customer transactions:', error);
+        if (error.response) {
+          console.error('Error response fetching customer transactions:', error.response.data);
+      } else if(error.message) {
+          console.error('Error message fetching customer transactions:', error.message);
+      }
+      else if (error.req){
+        console.error('Error request fetching customer transactions:', error.req);
+      }
       });
   }, [custID]); //return/store as an array
 

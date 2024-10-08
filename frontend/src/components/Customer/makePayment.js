@@ -1,6 +1,5 @@
-import React, {useState} from "react"
-import axios from "axios"
-//import { response } from '/../backend/app'
+import React, {useState} from 'react'
+import axios from 'axios'
 import stylesheet from '../stylesheet.css'  // Import CSS file here
 import { useNavigate } from 'react-router-dom'
 
@@ -8,9 +7,7 @@ const UseMakePayment = () =>{
     const [payment, setPayment] = useState({
         amount: "",
         currency: "",
-        provider: "",
-        recipientAccount: "",
-        swiftCode: ""
+        SWIFT: ""
       })
       const navigate = useNavigate()
 
@@ -23,25 +20,24 @@ const UseMakePayment = () =>{
         e.preventDefault()
         const response = axios.post('https://localhost:433/make_payment', payment, 
         {headers: {
-            'Authorisation': `Bearer ${localStorage.getItem('token')}`
-            }
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json' 
+      }
+      
         })
             .then(response => {
                 alert(response.data.message)
             })
             .catch(error =>{
               if (error.response) {
-                // The request was made and the server responded with a status code
-                console.error(`Error Response: ${error.response.data}`);
-                alert(`Login Failed: ${error.response.data.message || error.message}`);
+                console.error('Error when making payment:', error.response.data);
+                alert(`Payment Failed: ${error.response.data.message || error.message}`);
             } else if (error.request) {
-                // The request was made but no response was received
                 console.error('Error Request:', error.request);
-                alert('Login Failed: No response received from the server.');
+                alert('Payment Failed: No response received from the server.');
             } else {
-                // Something happened in setting up the request
                 console.error('Error:', error.message);
-                alert(`Login Failed: ${error.message}`);
+                alert(`Payment Failed: ${error.message}`);
             }
           })
     }
@@ -58,7 +54,6 @@ const UseMakePayment = () =>{
             required 
           />
 
-
           <select 
             name="currency" 
             value={payment.currency} 
@@ -72,20 +67,9 @@ const UseMakePayment = () =>{
             <option value="GBP">GBP</option>
           </select>
 
-
           <input 
             type="text" 
-            name="recipientAccount" 
-            value={payment.recipientAccount} 
-            onChange={handleChange} 
-            placeholder="Recipient's Account Information" 
-            required 
-          />
-
-
-          <input 
-            type="text" 
-            name="swiftCode" 
+            name="SWIFT" 
             value={payment.swiftCode} 
             onChange={handleChange} 
             placeholder="SWIFT Code" 

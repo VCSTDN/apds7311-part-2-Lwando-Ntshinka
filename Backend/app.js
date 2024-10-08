@@ -51,6 +51,7 @@ const app = express();
 const privateKeyPath = path.resolve(__dirname, './Keys/bankprivatekey.pem')
 const certificatePath = path.resolve(__dirname, './Keys/certificate.pem')
 
+
 if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) { //Check for certificates
   console.error('SSL key or certificate not found')
   process.exit(1);
@@ -73,6 +74,8 @@ if (isProduction) {
 //#endregion
 
 //#region  Middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors(
@@ -81,7 +84,8 @@ app.use(cors(
     credentials: true, // Enable cookies or auth headers
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Ensure all methods are allowed
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
+    allowedHeaders: ['Content-Type', 'Authorization']
     }))) //Access Make parment Class
 app.options('*', cors()); // Enable pre-flight (OPTIONS) requests for all routes
 app.use(helmet({
@@ -121,11 +125,11 @@ app.post('/signup', brute.prevent, async (req, res) => {
     try {
         // Hashing and salting the password
         const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
-        
+        //const custId = await require('./database/database').generateCustomID('CUS', 'Customers')
         
         // Creating the user model with the hashed password
         let userModel = {
-            custID: req.body.database.generateCustomID('CUS', 'Customers'),
+            custID: 'CUS',
             name: req.body.name,
             surname: req.body.surname,
             email: req.body.email,
@@ -159,7 +163,8 @@ const mongoCustomersCollection = await db.collection(customerCollection)
 const mongoEmployeesCollection = await db.collection(employeeCollection)
 
 try {
-    const user = {
+    const user = 
+    {
         email: req.body.email,
         password: req.body.password
     }        
@@ -193,11 +198,8 @@ try {
                 res.status(200).json({ message: 'Login successful', 
                                     token: generatedToken, 
                                     email: req.body.email, 
-                                    userId: req.body.userId,
-                                    _Id: existingUser._id.toString(),
+                                    _id: existingUser._id.toString(),
                                     userType })
-                console.log("Token is: ", generatedToken) //Delete in ptoduction
-                console.log("User is: ", userType) //Delete in ptoduction
             } else {
                 // Password doesn't match
                 res.status(401).json({ message: 'Incorrect email or password' })
@@ -242,7 +244,6 @@ app.post('/make_payment',
 
         //Call to make_payment method in Payments Class
         const result = await Make_Payment.make_payment(req.body)
-        res.status(201).send('Payment Completed and Pending Verification')
         res.status(201).send(result) //return result of insersion
     }
 
@@ -254,24 +255,24 @@ app.post('/make_payment',
 })
 
 //Customer- View Payments
-app.get('/payment_details/:cust_id', 
+app.get('/payment_details/:_id', 
     //Input Sanitation
-    [check('cust_id').isMongoId().withMessage('Invalid customer ID')],
+    [check('_id').isMongoId().withMessage('Invalid customer ID')],
     //Check Authentication
     checkAuthentication,
     async (req, res) => {
         
         try {
             ////Get Customer ID to view details
-            const cust_id = req.params.cust_id
-            const result = await Make_Payment.view_user_payments(cust_id); //Fetch all payments
+            const _id = req.params._id
+            const result = await Make_Payment.view_user_payments(_id); //Fetch all payments
             res.status(200).json(result) //Send payment List
             console.log(result)
   
             //Access payments table  
-            const payment = await collection.find( { custId: req.params.custId })
-            res.status(200).json(collection.filter((customer) => customer.custId === req.params.custId))
-            console.log(collection.filter((customer) => customer.custId === req.params.custId))
+            //const payment = await collection.find( { custId: req.params._id })
+            //res.status(200).json(collection.filter((customer) => customer._id === req.params._id))
+            //console.log(collection.filter((customer) => customer._id === req.params._id))
         }
 
         catch (error) {

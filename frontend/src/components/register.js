@@ -3,11 +3,8 @@ import axios from 'axios'
 import {useNavigate } from 'react-router-dom'
 import stylesheet from '../components/stylesheet.css'
 
-
-//Backend code to run: APDS7311\Programmes\Backend\Auth\user.js
-
 //Sign up function
-const Signup = () => {
+const UseSignup = () => {
     const [name, setName] = useState('') //Assign empty string for name
     const [surname, setSurname] = useState('') //Assign empty string for name
     const [email, setEmail] = useState('') //Assign empty string for name
@@ -17,34 +14,35 @@ const Signup = () => {
 
     const handleSignup = (e) =>{
         e.preventDefault()
-        const response = axios.post('https://localhost:433/signup', {
-            name, surname, email, account, password
-        })
+        const response = axios.post('https://localhost:433/signup', 
+            { name, surname, email, account, password }, 
+            { withCredentials: true,
+                headers: {
+                  'Content-Type': 'application/json'  // Explicitly set Content-Type
+                }
+             })
         .then(response =>{
-            alert(response.data)
+            alert(response.data.message)
             navigate('/login')
         })
         .catch(error => {
             if (error.response) {
-                // The request was made and the server responded with a status code
-                console.error(`Error Response: ${error.response.data}`);
-                alert(`Login Failed: ${error.response.data.message || error.message}`);
+                console.error('Error Response:', error.response.data);
+                alert(`Signup Failed: ${error.response.data.message || JSON.stringify(error.response.data)}`);
             } else if (error.request) {
-                // The request was made but no response was received
                 console.error('Error Request:', error.request);
-                alert('Login Failed: No response received from the server.');
+                alert('Signup Failed: No response received from the server.');
             } else {
-                // Something happened in setting up the request
                 console.error('Error:', error.message);
-                alert(`Login Failed: ${error.message}`);
-        }
+                alert(`Signup Failed: ${error.message}`);
+            }
     })
 
     }
 
     return(
         <form onSubmit={handleSignup}>
-            <h1>Register User</h1>
+            <h1>Register New User</h1>
             <div>
                 <label>Name</label>
                 <input type='text' value={name} onChange={(e) => setName(e.target.value)}/>
@@ -77,4 +75,4 @@ const Signup = () => {
     )
 
 }
-export default Signup
+export default UseSignup

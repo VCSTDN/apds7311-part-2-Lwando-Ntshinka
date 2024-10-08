@@ -3,10 +3,6 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import stylesheet from '../components/stylesheet.css'
 
-
-//Backend code to run: APDS7311\Programmes\Backend\Auth\user.js
-//Backed code check authentication: APDS7311\Programmes\Backend\index.js
-
 const UseLogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -15,25 +11,24 @@ const UseLogin = () => {
     const handleLogin = (e) => {
         e.preventDefault()
 
-        const response = axios.post('https://localhost:433/login', { email, password }, { withCredentials: true })
+        const response = axios.post('https://localhost:433/login', 
+                        { email, password }, 
+                        { withCredentials: true })
             .then((response) => {
                 const token = response.data.token
                 const userType = response.data.userType
-                const userId = response.data.userId
-                const _Id = response.data._Id
+                const _id = response.data._id
                 
 
                 // Store data localStorage or sessionStorage
                 localStorage.setItem('token', token);
                 localStorage.setItem('userType', userType);
-                localStorage.setItem('userId', userId);
-                localStorage.setItem('_Id', _Id);
-                localStorage.setItem('userId', userId);
+                localStorage.setItem('_id', _id);
                 alert(response.data.message)
 
                 //Navigate to respective page depending on which user logged in
                 if (userType === 'Customers') {
-                    navigate(`/Customer/customerViewPayments/${userId}`);  // Redirect Customer to their payment page
+                    navigate(`/Customer/customerViewPayments/${_id}`);  // Redirect Customer to their payment page
                 } else if (userType === 'Employees') {
                     navigate(`/Employee/employeeViewPayments`);  // Redirect Employee to their payment page
                 }
@@ -58,7 +53,7 @@ const UseLogin = () => {
 
     return (
         <form onSubmit={handleLogin}>
-            <h1>Login</h1>
+            <h1>Login User</h1>
             <div>
                 <label>Email</label>
                 <input type='text' value={email} onChange={(e) => setEmail(e.target.value)} />
