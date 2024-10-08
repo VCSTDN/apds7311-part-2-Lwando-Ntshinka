@@ -37,7 +37,7 @@ function App() {
         <Route path='/register' element={<Register/>}/>
 
         {/* Customer Routes */}
-        <Route path='/Customer/:custID/customerViewPayments' element={<CustomerViewPayments/>}/>
+        <Route path='/Customer/customerViewPayments/:custID' element={<CustomerViewPayments/>}/>
         <Route path='/Customer/makePayment' element={<MakePayments/>}/>
 
         {/* Employee Routes */}

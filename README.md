@@ -109,6 +109,8 @@ Helmet.js. [s.a.] Get started, [s.a.]. [Online] Available at:</br> https://helme
 
 Medium. 2018. Rate limiting, brute force and DDoS attacks protection in Node.js, 4 June 2018. [Online]. Available at: https://medium.com/@animirr/rate-limiting-brute-force-and-ddos-attacks-protection-in-node-js-2492c4a9249 [Accessed: 30 September 2024]. </br></br>
 
+Medium. 2021. JSON Web Token (JWT) in node.js (Implementing using Refresh token), 20 March 2021. [Online]. </br> Available at: https://kettan007.medium.com/json-web-token-jwt-in-node-js-implementing-using-refresh-token-90e24e046cf8 [Accessed: 30 September 2024]. </br></br>
+
 Medium. 2021. Load balancing your NodeJS app with NGINX and PM2, 5 November 2021. [Online]. Available at: https://bencoderus.medium.com/load-balancing-your-nodejs-server-with-nginx-and-pm2-8095f558da2e [Accessed: 30 September 2024]. </br></br>
 
 MongoDB. https://www.mongodb.com/docs/atlas/atlas-ui/documents/

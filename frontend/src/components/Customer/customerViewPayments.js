@@ -22,30 +22,30 @@ function UseCustomerViewPayments() {
   }, [custID]); //return/store as an array
 
     return(
-        <div className="container">
+      <div className="container">
       <h2>Customer Portal</h2>
       <table>
-        <thead>
-          <tr>
-            <th>Transaction ID</th>
-            <th>Amount</th>
-            <th>Currency</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {payments.map((transaction, index) => (
-            <tr key={index}>
-              <td>{payments._id}</td>
-              <td>{payments.amount}</td>
-              <td>{payments.currency}</td>
-              <td>{payments.status}</td>
-            </tr>
-          ))}
-        </tbody>
+          <thead>
+              <tr>
+                  <th>Transaction ID</th>
+                  <th>Amount</th>
+                  <th>Currency</th>
+                  <th>Status</th>
+              </tr>
+          </thead>
+          <tbody>
+              {payments.map((transaction, index) => (
+                  <tr key={index}>
+                      <td>{transaction._id}</td>
+                      <td>{transaction.amount}</td>
+                      <td>{transaction.currency}</td>
+                      <td>{transaction.status}</td>
+                  </tr>
+              ))}
+          </tbody>
       </table>
 
-      <button type="button" onClick={() => navigate('/Customer/makePayment')} style={{ padding: '10px 20px', margin: '10px' }}>Make Payment</button>
+      <button type="button" onClick={() => navigate('/Customer/makePayment')} style={{  padding: '10px 20px', margin: '10px' }}>Make Payment</button>
     </div>
     )
 
