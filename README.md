@@ -99,6 +99,12 @@ Dev. 2021. How to make a loading screen for an iframe using functional component
 
 Geeks for Geeks. 2021. Node.js Securing Apps with Helmet.js, 8 October 2021. [Online]. Available at:</br> https://www.geeksforgeeks.org/node-js-securing-apps-with-helmet-js/ [Accessed: 5 October 2024]. </br></br>
 
+GitHub Docs. [s.a.] Duplicating a repository, [s.a.]. [Online] Available at: https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository [Accessed: 8 October 2024]. </br></br>
+
+
+Gitlab. [s.a.] How to enable or disable GitLab CI/CD, [s.a.]. [Online] Available at:
+https://gitlab.cn/docs/14.0/ee/ci/enable_or_disable_ci.html</br> [Accessed: 5 October 2024]. </br></br>
+
 Helmet.js. [s.a.] Get started, [s.a.]. [Online] Available at:</br> https://helmetjs.github.io/ [Accessed: 5 October 2024]. </br></br>
 
 Medium. 2018. Rate limiting, brute force and DDoS attacks protection in Node.js, 4 June 2018. [Online]. Available at: https://medium.com/@animirr/rate-limiting-brute-force-and-ddos-attacks-protection-in-node-js-2492c4a9249 [Accessed: 30 September 2024]. </br></br>
@@ -114,6 +120,10 @@ Open Classroom. Go Full-Stack With Node.js, Express, and MongoDB, 21 February 20
 
 Quora. [s.a.].  How do you get user info from MongoDB in Node.js (node.js, MongoDB, development), [s.a.]. [Online]. Available at: https://www.quora.com/How-do-you-get-user-info-from-MongoDB-in-Node-js-node-js-MongoDB-development [Accessed: 30 September 2024]. </br></br>
 
+Reflectiz. 2023. 7 Required Steps to Secure Your iFrames Security, 4 January 2023. [Online].</br> Available at: https://www.reflectiz.com/blog/iframe-security/ [Accessed: 30 September 2024]. </br></br>
+
 StackOverflow. 2023. How to get a particular user data from MongoDB in node.js, 2023. [Online].</br> Available at: https://stackoverflow.com/questions/75217026/how-to-get-a-particular-user-data-from-mongodb-in-node-js [Accessed: 30 September 2024]. </br></br>
 
 StackOverflow. 2009. Generate random string/characters in JavaScript, 28 August 2009. [Online].</br> Available at: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript [Accessed: 30 September 2024]. </br></br>
+
+VLink. 2024. How to build a CI/CD pipeline with GitHub Actions, 26 February 2024. [Online].</br> Available at: https://www.vlinkinfo.com/blog/how-to-build-a-cicd-pipeline/ [Accessed: 8 October 2024]. </br></br>

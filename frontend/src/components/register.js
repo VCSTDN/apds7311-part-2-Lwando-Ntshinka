@@ -17,7 +17,7 @@ const Signup = () => {
 
     const handleSignup = (e) =>{
         e.preventDefault()
-        axios.post('https://localhost:433/signup', {
+        const response = axios.post('https://localhost:433/signup', {
             name, surname, email, account, password
         })
         .then(response =>{

@@ -8,7 +8,7 @@ const UseEmployeeViewPayments = () => {
     const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    axios.get('https://127.0.0.1:433/${empID}/view_banking_details')
+    axios.get('https://127.0.0.1:433/view_banking_details')
       .then(response => {
         setTransactions(response.data);
       })

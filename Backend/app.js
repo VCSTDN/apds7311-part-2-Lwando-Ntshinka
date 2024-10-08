@@ -77,7 +77,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors(
     ({
-    origin: 'http://localhost:3000', // Specify the origin that is allowed
+    origin: 'https://localhost:3000', // Specify the origin that is allowed
     credentials: true, // Enable cookies or auth headers
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Ensure all methods are allowed
     preflightContinue: false,
@@ -218,8 +218,6 @@ try {
 //#endregion
 
 
-//#region Payments
-
 //#region Customer Payments
 
 //Customer- Make Payment
@@ -256,7 +254,7 @@ app.post('/make_payment',
 })
 
 //Customer- View Payments
-app.get('/:cust_id/payment_details', 
+app.get('/payment_details/:cust_id', 
     //Input Sanitation
     [check('cust_id').isMongoId().withMessage('Invalid customer ID')],
     //Check Authentication
@@ -268,10 +266,7 @@ app.get('/:cust_id/payment_details',
             const cust_id = req.params.cust_id
             const result = await Make_Payment.view_user_payments(cust_id); //Fetch all payments
             res.status(200).json(result) //Send payment List
-
-            //Access database
-            //const paymentDatabase = database.db(databaseName)
-            //const collection = paymentDatabase.collection(paymentCollection)
+            console.log(result)
   
             //Access payments table  
             const payment = await collection.find( { custId: req.params.custId })
@@ -324,8 +319,6 @@ app.patch('/verify_payment/:paymentID',  checkAuthentication,
         res.status(500).send('Internal Server Error');
     }
 })
-//#endregion
-
 //#endregion
 
 module.exports= app

@@ -15,7 +15,7 @@ const UseLogin = () => {
     const handleLogin = (e) => {
         e.preventDefault()
 
-        axios.post('https://localhost:433/login', { email, password }, { withCredentials: true })
+        const response = axios.post('https://localhost:433/login', { email, password }, { withCredentials: true })
             .then((response) => {
                 const token = response.data.token
                 const { userType, userId, _Id } = response.data;
@@ -28,9 +28,9 @@ const UseLogin = () => {
                 alert(response.data.message)
 
                 //Navigate to respective page depending on which user logged in
-                if (userType === 'Customer') {
+                if (userType === 'Customers') {
                     navigate(`/Customer/${userId}/customerViewPayments`);  // Redirect Customer to their payment page
-                } else if (userType === 'Employee') {
+                } else if (userType === 'Employees') {
                     navigate(`/Employee/employeeViewPayments`);  // Redirect Employee to their payment page
                 }
 

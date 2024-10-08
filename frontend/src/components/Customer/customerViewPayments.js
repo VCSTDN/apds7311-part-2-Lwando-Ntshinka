@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from "react"
 import axios from 'axios'
 //import { response } from "/../backend/app.js"
+import { useNavigate } from 'react-router-dom'
 import stylesheet from '../stylesheet.css'
 import { useParams } from 'react-router-dom';
 
 function UseCustomerViewPayments() {
     const [payments, setPayments] = useState([])
-    const { custID } = useParams();
+    const { custID } = useParams()
+    const navigate = useNavigate()
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`https://localhost:433/${custID}/payment_details`, {headers: { Authorization: `Bearer ${token}` }})
+    axios.get(`https://localhost:433/payment_details/${custID}`, {headers: { Authorization: `Bearer ${token}` }})
       .then(response => {
         setPayments(response.data);
       })
@@ -42,6 +44,8 @@ function UseCustomerViewPayments() {
           ))}
         </tbody>
       </table>
+
+      <button type="button" onClick={() => navigate('/Customer/makePayment')} style={{ padding: '10px 20px', margin: '10px' }}>Make Payment</button>
     </div>
     )
 

@@ -2,6 +2,7 @@ import React, {useState} from "react"
 import axios from "axios"
 //import { response } from '/../backend/app'
 import stylesheet from '../stylesheet.css'  // Import CSS file here
+import { useNavigate } from 'react-router-dom'
 
 const UseMakePayment = () =>{
     const [payment, setPayment] = useState({
@@ -11,6 +12,7 @@ const UseMakePayment = () =>{
         recipientAccount: "",
         swiftCode: ""
       })
+      const navigate = useNavigate()
 
       const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,8 +30,20 @@ const UseMakePayment = () =>{
                 alert(response.data.message)
             })
             .catch(error =>{
-                console.error(`Error when making payments', {error}`)
-            })
+              if (error.response) {
+                // The request was made and the server responded with a status code
+                console.error(`Error Response: ${error.response.data}`);
+                alert(`Login Failed: ${error.response.data.message || error.message}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('Error Request:', error.request);
+                alert('Login Failed: No response received from the server.');
+            } else {
+                // Something happened in setting up the request
+                console.error('Error:', error.message);
+                alert(`Login Failed: ${error.message}`);
+            }
+          })
     }
     return(
         <div>
@@ -79,6 +93,7 @@ const UseMakePayment = () =>{
           />
 
           <button type="submit">Pay Now</button>
+          <button type="button" onClick={() => navigate('/Customer/makePayment')} style={{ padding: '10px 20px', margin: '10px' }}>Return</button>
         </form>
       </div>)
 }
