@@ -8,12 +8,12 @@ const paymentCollection = 'Payments'
 
 
 class Make_Payment {
-    constructor(paymentID, paymentAmount, paymentCurrency, SWIFTNo)
+    constructor(paymentAmount, paymentCurrency, SWIFTNo)
     {
         this.db = null
         //this.collection = null;
         this.client = null
-        this.paymentID = paymentID
+        this.paymentID = "PAY"
         this.payID = async () => await require('./Database/database')('PAY', 'Payments')
         this.paymentAmount = paymentAmount
         this.paymentCurrency = paymentCurrency

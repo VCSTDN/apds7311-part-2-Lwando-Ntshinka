@@ -7,6 +7,8 @@ const UseLogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const navigate = useNavigate()
+    var token
+    
 
     const handleLogin = (e) => {
         e.preventDefault()
@@ -15,7 +17,7 @@ const UseLogin = () => {
                         { email, password }, 
                         { withCredentials: true })
             .then((response) => {
-                const token = response.data.token
+                token = response.data.token
                 const userType = response.data.userType
                 const _id = response.data._id
                 
@@ -25,6 +27,8 @@ const UseLogin = () => {
                 localStorage.setItem('userType', userType);
                 localStorage.setItem('_id', _id);
                 alert(response.data.message)
+
+                console.log(`Token : ${token}`)
 
                 //Navigate to respective page depending on which user logged in
                 if (userType === 'Customers') {

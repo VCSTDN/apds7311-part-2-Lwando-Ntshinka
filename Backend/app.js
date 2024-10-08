@@ -194,7 +194,8 @@ try {
 
             if (passwordMatch) {
 
-                const generatedToken = jwt.sign({ email: req.body.email }, "SecretThing", { expiresIn: "20m"})
+                const generatedToken = jwt.sign({ email: req.body.email }, 'ThisIsTheStringThatWillBeUsedToEncryptTheTokenGenerated', { expiresIn: "20m"})
+                console.log(`Token : ${generatedToken}`)
                 res.status(200).json({ message: 'Login successful', 
                                     token: generatedToken, 
                                     email: req.body.email, 
@@ -228,12 +229,14 @@ app.post('/make_payment',
         check('_id').isMongoId().withMessage('Invalid customer ID'),
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
-        check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code')
-      ], checkAuthentication, //Check Authentication
+        check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code'),
+        check('custID').notEmpty().withMessage('Customer ID is required')
+    ], 
+    //checkAuthentication, //Check Authentication
         async(req, res)=>{
 
 
-    const errors = validationResult(req);
+    const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }

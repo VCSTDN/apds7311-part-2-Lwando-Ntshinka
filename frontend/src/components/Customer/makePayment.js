@@ -2,12 +2,14 @@ import React, {useState} from 'react'
 import axios from 'axios'
 import stylesheet from '../stylesheet.css'  // Import CSS file here
 import { useNavigate } from 'react-router-dom'
+//import checkauth from '../../../../Backend/database/checkAuthentication'
 
 const UseMakePayment = () =>{
     const [payment, setPayment] = useState({
         amount: "",
         currency: "",
-        SWIFT: ""
+        SWIFT: "",
+        custID: localStorage.getItem("_id") // Assuming custID is stored in localStorage
       })
       const navigate = useNavigate()
 
@@ -16,28 +18,38 @@ const UseMakePayment = () =>{
         setPayment((prevPayment) => ({ ...prevPayment, [name]: value }));
       }
 
+      // Retrieve and decode the JWT token
+      const token = localStorage.getItem('token');
+      if (token) {
+          const decodedToken = JSON.parse(atob(token.split('.')[1]));
+          console.log(decodedToken);  // Display decoded token in the console
+      } else {
+          console.log('No token found in localStorage');
+      }
+
     const handleSubmitPayment = (e) => {
         e.preventDefault()
         const response = axios.post('https://localhost:433/make_payment', payment, 
-        {headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json' 
-      }
-      
-        })
+        /*{headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json' }}*/)
             .then(response => {
                 alert(response.data.message)
+                navigate(`/Customer/customerViewPayments/${payment.custID}`)
             })
             .catch(error =>{
               if (error.response) {
                 console.error('Error when making payment:', error.response.data);
-                alert(`Payment Failed: ${error.response.data.message || error.message}`);
+                alert(`Payment Failed 1: ${error.response.data.message || error.message}`);
+                navigate(`/Customer/customerViewPayments/${payment.custID}`)
             } else if (error.request) {
                 console.error('Error Request:', error.request);
-                alert('Payment Failed: No response received from the server.');
+                alert('Payment Failed 2: No response received from the server.');
+                navigate(`/Customer/customerViewPayments/${payment.custID}`)
             } else {
                 console.error('Error:', error.message);
-                alert(`Payment Failed: ${error.message}`);
+                alert(`Payment Failed 3: ${error.message} Token ${localStorage.getItem('token')}`);
+                navigate(`/Customer/customerViewPayments/${payment.custID}`)
             }
           })
     }
@@ -70,7 +82,7 @@ const UseMakePayment = () =>{
           <input 
             type="text" 
             name="SWIFT" 
-            value={payment.swiftCode} 
+            value={payment.SWIFT} 
             onChange={handleChange} 
             placeholder="SWIFT Code" 
             required 
