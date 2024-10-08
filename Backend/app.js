@@ -37,7 +37,7 @@ const { markAsUntransferable } = require('worker_threads')
 //#endregion
 
 //#region  Declare Variables
-const port = process.env.PORT || 8443 // Default to port 8443 if port 443 is in use
+const port = 433/*process.env.PORT*/
 const databaseName = 'Banking_International'
 const paymentCollection = 'Payments'
 const customerCollection = 'Customers'
@@ -77,7 +77,11 @@ if (isProduction) {
 //#region  Middleware
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors()) //Access Make parment Class
+app.use(cors(
+    ({
+    origin: '*', // Specify the origin that is allowed
+    credentials: true // Enable cookies or auth headers
+    }))) //Access Make parment Class
 app.use(helmet({
     contentSecurityPolicy: {
       directives: {

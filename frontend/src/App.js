@@ -44,10 +44,7 @@ function App() {
         <Route path='/Employee/employeeViewPayments' element={<EmployeeViewPayments/>}/>
         <Route path='/Employee/verifyPayments' element={<EmployeeVerifyPayments/>}/>
          
-         {/* Add IFrame route here */}
-         <Route path="/external/google" element={<IFrameComponent src="https://www.google.com" />} />
-        <Route path="/external/wikipedia" element={<IFrameComponent src="https://www.wikipedia.org" />} />
-      </Routes>
+         </Routes>
     </Router>
   );
 }

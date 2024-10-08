@@ -17,7 +17,7 @@ const Signup = () => {
 
     const handleSignup = (e) =>{
         e.preventDefault()
-        axios.post('https://127.0.0.1:433/signup', {
+        axios.post('https://localhost:433/signup', {
             name, surname, email, account, password
         })
         .then(response =>{
@@ -25,8 +25,8 @@ const Signup = () => {
             navigate('/login')
         })
         .catch(error => {
-            console.error('Error creating account', error)
-            alert('Error creating account')
+            console.error(`Error creating account ${error}`)
+            alert(`Internal error when creating account ${error}`)
         })
 
     }

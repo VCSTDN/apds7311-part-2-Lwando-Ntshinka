@@ -15,7 +15,7 @@ const UseLogin = () => {
     const handleLogin = (e) => {
         e.preventDefault()
 
-        axios.post('https://127.0.0.1:433/login', {
+        axios.post('https://localhost:433/login', {
             email, password
         })
             .then((response) => {
@@ -30,15 +30,15 @@ const UseLogin = () => {
                 //Navigate to respective page depending on which user logged in
                 // Redirect based on user type
                 if (userType === 'Customer') {
-                    navigate(`/customer/view-payments/${userId}`);  // Redirect Customer to their payment page
+                    navigate(`/Customer/${userId}/customerViewPayments`);  // Redirect Customer to their payment page
                 } else if (userType === 'Employee') {
-                    navigate(`/employee/view-payments/${userId}`);  // Redirect Employee to their payment page
+                    navigate(`/Employee/employeeViewPayments`);  // Redirect Employee to their payment page
                 }
 
             })
             .catch(error => {
-                console.error('Login Failed', error)
-                alert('Login attempt Failed, please check your email and password')
+                console.error(`Login Failed due to internal error ${error}`)
+                alert(`Login Failed due to internal error ${error}`)
             })
     }
 
