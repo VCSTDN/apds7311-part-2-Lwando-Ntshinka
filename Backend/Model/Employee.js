@@ -1,7 +1,7 @@
 //Imports
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const databaseFile = require('../database/database')
+const databaseFile = require('../Database/database')
 
 //Variable Declaration
 const databaseName = 'Banking_International'

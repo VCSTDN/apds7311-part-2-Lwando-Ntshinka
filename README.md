@@ -76,6 +76,7 @@ The following security measures have been taken into consideration for the appli
   - Password hashing and salting
   - SSL Digital Certificates
 
+This part will mainly feature the customer portal.
 
 ##Requirements
 The following is required to ensure that the application will function as intented:

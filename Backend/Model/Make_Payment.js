@@ -1,6 +1,5 @@
-const database = require("../database/database")
+const database = require('../Database/database')
 const { MongoClient } = require('mongodb')
-const databaseFile = require('../database/database')
 
 //Variable declaration
 const databaseName = 'Banking_International'
@@ -8,13 +7,10 @@ const paymentCollection = 'Payments'
 
 
 class Make_Payment {
-    constructor(paymentAmount, paymentCurrency, SWIFTNo)
+    constructor(custID,paymentAmount, paymentCurrency, SWIFTNo)
     {
-        this.db = null
-        //this.collection = null;
-        this.client = null
-        this.paymentID = "PAY"
-        this.payID = async () => await require('./Database/database')('PAY', 'Payments')
+        this.payID = null //set in make_payment
+        this.custID = custID;
         this.paymentAmount = paymentAmount
         this.paymentCurrency = paymentCurrency
         this.SWIFTNo = SWIFTNo
@@ -26,11 +22,10 @@ class Make_Payment {
         try{
             if(!this.client){
                 //Initialise database
-                this.client = await require('./Database/database').database_connect()
+                this.client = await database.database_connect()
                 console.log("Make_Payment.js: Database client initialized successfully")
             }
-            //this.collection = this.client.db(databaseName).collection(paymentCollection);
-            //return this.client
+            this.collection = this.client.db(databaseName).collection(paymentCollection);
         }
         catch(error){
             console.error("Make_Payment.js: Error initializing database", error)
@@ -39,24 +34,37 @@ class Make_Payment {
         
     }
 
+        //Generate Payment
+        static async generatePaymentID() {
+            const paymentCount = await this.collection.countDocuments();
+            return `PAY${String(paymentCount + 1).padStart(3, '0')}`;
+        }
+
     //#region Customer Payment Transactions
     static async make_payment(paymentData) { //Post Request for Customers
         try {
             await this.initialiseDatabase() //Initialise database
-
+            console.log('Make_Payment.js make_payment method: Database client initialized successfully')
+            
             //Initialise database
-            const db = this.client.db('Banking_International')
-            const collection = db.collection('Payments');
+            const payment = {
+                payID: await this.generatePaymentID(),
+                custID: paymentDetails.custID,
+                amount: paymentDetails.amount,
+                currency: paymentDetails.currency,
+                SWIFT: paymentDetails.SWIFT,
+                paymentStatus: "pending",
+                createdAt: new Date()
+            };
 
             // Insert the payment into the 'payments' collection
-            const result = await collection.insertOne(paymentData);
-
+            const result = await this.collection.insertOne(payment);
             console.log(`Make_Payment.js: Payment added with id: ${result.insertedId}`);
             return result;
         }
 
         catch (error) {
-            console.error('Make_Payment.js: Error in make_Payment:', error);
+            console.error("Make_Payment.js: Error in make_Payment:", error);
             throw error;
         } 
         
@@ -72,11 +80,10 @@ class Make_Payment {
         try{
             //Initialise database
             await this.initialiseDatabase()
-            const db = this.client.db('Banking_International')
-            const collection = db.collection('Payments');
 
-            const result = await collection.find({ custID }).toArray() //Get payments
-            return result
+            const payments = await this.collection.find({ custID }).toArray();
+
+            return payments
         }
 
         catch (error)
@@ -94,11 +101,8 @@ class Make_Payment {
         try{
             //Initialise database
             await this.initialiseDatabase()
-            const db = this.client.db('Banking_International')
-            const collection = db.collection('Payments')
 
-
-            const result = await collection.find({}).toArray() //Get payments
+            const result = await this.collection.find({}).toArray() //Get payments
             return result
         }
 
@@ -113,22 +117,21 @@ class Make_Payment {
         try {
             //Initialise database
             await this.initialiseDatabase() 
-            const db = this.client.db('Banking_International')
-            const collection = db.collection('Payments')
 
             //Locate payment and update status
-            const result = await collection.updateOne(
-                { paymentID: new ObjectId(paymentID) },
-                { $set: { paymentStatus: 'approved' } }
+            const result = await this.collection.updateOne(
+                { _id: new MongoClient.ObjectId(paymentID) },
+                { $set: { paymentStatus: "verified" } }
             );
             if (result.modifiedCount > 0) {
                 console.log(`Payment with ID ${paymentID} has been verified.`);
                 return { status: 'success', message: 'Payment verified' };
-              } else {
+              } 
+            else {
                 return { status: 'fail', message: 'Payment not found' };
               }
         } catch (error) {
-            console.error('app.js: Error verifying payment:', error);
+            console.error('Make_Payment.js: Error verifying payment:', error);
             throw error;
         }
     

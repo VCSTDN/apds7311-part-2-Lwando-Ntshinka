@@ -6,25 +6,8 @@ const tokens = {};
 
 // Check Authentication in requests
 const checkauth = (req, res, next) => {
-    //const authHeader = req.headers.authorization;
-
-    //if (!authHeader) {
-    //    return res.status(401).json({ message: 'Session Timed Out' });
-    //}
-    //// Split the "Bearer" from the token
-    //const token = authHeader.split(' ')[1];
-
-    //if (!token) {
-    //    return res.status(401).json({ message: 'Token not found' });
-    //}
 
     try {
-        // Check if the token is expired
-        //if (Date.now() > tokenData.expirationTime) {
-        //    delete tokens[token];  // Clean up expired tokens
-        //    return res.status(401).json({ message: 'Session expired, please log in again' });
-        //}
-        //req.user = tokenData; // Attach decoded token info to request
 
         const token = req.header.authorization.split(' ')[1]
         jwt.verify(token, 'ThisIsTheStringThatWillBeUsedToEncryptTheTokenGenerated')

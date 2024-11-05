@@ -20,14 +20,15 @@ const cors = require('cors')
 //#endregion
 
 //#region  Import Classes
-const Payment = require('./model/Make_Payment')
+const Payment = require('./model/Make_Payment') 
 const Employee = require('./model/Employee')
-const checkAuthentication = require('./database/checkAuthentication.js')
+const Customer = require('../backend/Model/Customer')
+const checkAuthentication = require('../backend/Database/checkAuthentication')
 //#endregion
 
 //#region  Database imports
-const { client } = require('./database/database')
-const database = require('./database/database')
+const { client } = require('../backend/Database/database')
+const database = require('../backend/Database/database')
 const { MongoClient, ObjectId } = require('mongodb')
 const { connect } = require('http2')
 const Make_Payment = require('./model/Make_Payment')
@@ -121,43 +122,46 @@ database.database_connect()
 
 //#region Customer Regisetr and Customer & Employee LoginRequests
 // Signup Route
-app.post('/signup', brute.prevent, async (req, res) => {
-    try {
-        // Hashing and salting the password
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
-        //const custId = await require('./database/database').generateCustomID('CUS', 'Customers')
-        
-        // Creating the user model with the hashed password
-        let userModel = {
-            custID: 'CUS',
-            name: req.body.name,
-            surname: req.body.surname,
-            email: req.body.email,
-            accountnumber: req.body.accountnumber,
-            password: hashedPassword // Store the hashed password
-        }
+//app.post('/signup', brute.prevent, async (req, res) => {
+//    try {
+//        // Hashing and salting the password
+//        const hashedPassword = await bcrypt.hash(req.body.password, 10)  // Hash the password with salt
+//        
+//        // Creating the user model with the hashed password
+//        let userModel = {
+//            custID: Customer.generateCustomerID(), //Generate Customer ID
+//            name: req.body.name,
+//            surname: req.body.surname,
+//            IDNumber: req.body.IDNumber, 
+//            username: req.body.username, 
+//            accountNumber: req.body.accountNumber,
+//            password: hashedPassword // Store the hashed password
+//        }
+//
+//        //Declare Database
+//        this.client = await database.database_connect()
+//        const db = this.client.db('Banking_International')
+//        const collection = await db.collection('Customers')
+//        const result = await collection.insertOne(userModel)   
+//        res.status(201).send(result)
+//        console.log(`Password for user ${req.body.email} hashed successfully`)
+//
+//    } catch (err) {
+//        console.error(err)
+//        res.status(500).send({ message: 'Error during signup' }, err)
+//    }
+//})
 
-        //Declare Database
-        this.client = await require('./database/database.js').database_connect()
-        const db = this.client.db('Banking_International')
-        const collection = await db.collection('Customers')
-        const result = await collection.insertOne(userModel)   
-        res.status(201).send(result)
-        console.log(`Password for user ${req.body.email} hashed successfully`)
-
-    } catch (err) {
-        console.error(err)
-        res.status(500).send({ message: 'Error during signup' })
-    }
-})
 
 // Login Route
+
+
 app.post('/login', brute.prevent, async (req, res) => {
 // Updated regex pattern: at least 4 characters, at least one special character
 const passwordRegex = /^(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,}$/
 
 //Initialise Database
-this.client = await require('./database/database.js').database_connect()
+this.client = await database.database_connect()
 const db = this.client.db(databaseName)
 const mongoCustomersCollection = await db.collection(customerCollection)
 const mongoEmployeesCollection = await db.collection(employeeCollection)
@@ -165,7 +169,8 @@ const mongoEmployeesCollection = await db.collection(employeeCollection)
 try {
     const user = 
     {
-        email: req.body.email,
+        username: req.body.username,
+        accountNumber: req.body.accountNumber,
         password: req.body.password
     }        
 
@@ -173,13 +178,13 @@ try {
     if (passwordRegex.test(user.password)) {
 
         // Attempt to find the user in the database
-        const existingCustomer = await mongoCustomersCollection.findOne({ email: user.email })
+        const existingCustomer = await mongoCustomersCollection.findOne({ accountNumber: user.accountNumber }, {username: user.username})
         let userType = customerCollection
         const existingUser = existingCustomer || existingEmployee
 
         if(!existingCustomer)
         {
-            const existingEmployee = await mongoEmployeesCollection.findOne({ email: user.email })
+            const existingEmployee = await mongoEmployeesCollection.findOne({ accountNumber: user.accountNumber }, {username: user.username})
             userType = employeeCollection
         }
 
@@ -203,11 +208,11 @@ try {
                                     userType })
             } else {
                 // Password doesn't match
-                res.status(401).json({ message: 'Incorrect email or password' })
+                res.status(401).json({ message: 'Incorrect Credentials' })
             }
         } else {
             // User doesn't exist
-            res.status(404).json({ message: 'Incorrect email or password' })
+            res.status(404).json({ message: 'Incorrect Credentials' })
         }
     } else {
         // Password doesn't meet regex requirements
@@ -220,33 +225,32 @@ try {
 })
 //#endregion
 
-
 //#region Customer Payments
 
 //Customer- Make Payment
-app.post('/make_payment',
+app.post('/make_payment',brute.prevent,
     [   //Input Sanitisation
-        check('_id').isMongoId().withMessage('Invalid customer ID'),
+        /*check('paymentID').isMongoId().withMessage('Invalid payment ID'),*/
+        check('custID').isMongoId().withMessage('Invalid customer ID'),
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
-        check('SWIFT').isAlphanumeric().withMessage('Invalid SWIFT code'),
-        check('custID').notEmpty().withMessage('Customer ID is required')
+        check('SWIFT').isAlphanumeric().isLength({ min: 8, max: 11 }).withMessage('Invalid SWIFT code'),
     ], 
-    //checkAuthentication, //Check Authentication
+    //checkAuthentication
         async(req, res)=>{
 
-
+    //Validate Result
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     try{
-        //const paymentDB = database.paymentDB(databaseName)
-        const {payID, custID, amount, currency, SWIFT} = req.body //Payment Constructor
+        //Payment Constructor
+        const {custID, amount, currency, SWIFT} = req.body 
 
         //Call to make_payment method in Payments Class
-        const result = await Make_Payment.make_payment(req.body)
+        const result = await Make_Payment.make_payment({ custID, amount, currency, SWIFT })
         res.status(201).send(result) //return result of insersion
     }
 
@@ -258,24 +262,22 @@ app.post('/make_payment',
 })
 
 //Customer- View Payments
-app.get('/payment_details/:_id', 
+app.get('/:custID/payment_details', 
     //Input Sanitation
-    [check('_id').isMongoId().withMessage('Invalid customer ID')],
+    [check('custID').isMongoId().withMessage('Invalid customer ID')],
     //Check Authentication
     checkAuthentication,
     async (req, res) => {
-        
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
         try {
             ////Get Customer ID to view details
-            const _id = req.params._id
-            const result = await Make_Payment.view_user_payments(_id); //Fetch all payments
+            const custID  = req.params._id
+            const result = await Make_Payment.view_user_payments(custID); //Fetch all payments
             res.status(200).json(result) //Send payment List
             console.log(result)
-  
-            //Access payments table  
-            //const payment = await collection.find( { custId: req.params._id })
-            //res.status(200).json(collection.filter((customer) => customer._id === req.params._id))
-            //console.log(collection.filter((customer) => customer._id === req.params._id))
         }
 
         catch (error) {
