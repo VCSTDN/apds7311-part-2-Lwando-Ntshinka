@@ -76,7 +76,7 @@ The following security measures have been taken into consideration for the appli
   - Password hashing and salting
   - SSL Digital Certificates
 
-This part will mainly feature the customer portal.
+This part will feature the customer and employee portal.
 
 ##Requirements
 The following is required to ensure that the application will function as intented:
@@ -89,6 +89,20 @@ Visual studio code
 
 ##Intructions
 The project comprises of various folders that can be run on a browser. The default port for the application is 433. The alternative port is 8443
+
+###Dummy data credentals:
+Customer:
+{
+    "username": "emWhite",
+    "accountNumber": "9700256294",
+    "password": "@December1994"
+}
+
+{
+    "username": "tbodessonk",
+    "accountNumber": "2920204122",
+    "password": "myPassword789"
+}
 
 
 ##References

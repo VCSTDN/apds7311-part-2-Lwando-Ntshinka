@@ -49,10 +49,10 @@ class Make_Payment {
             //Initialise database
             const payment = {
                 payID: await this.generatePaymentID(),
-                custID: paymentDetails.custID,
-                amount: paymentDetails.amount,
-                currency: paymentDetails.currency,
-                SWIFT: paymentDetails.SWIFT,
+                _id: paymentData._id,
+                amount: paymentData.amount,
+                currency: paymentData.currency,
+                SWIFT: paymentData.SWIFT,
                 paymentStatus: "pending",
                 createdAt: new Date()
             };

@@ -20,7 +20,7 @@ const cors = require('cors')
 //#endregion
 
 //#region  Import Classes
-const Payment = require('./model/Make_Payment') 
+const Payment = require('./Model/Make_Payment') 
 const Employee = require('./model/Employee')
 const Customer = require('../backend/Model/Customer')
 const checkAuthentication = require('../backend/Database/checkAuthentication')
@@ -31,7 +31,7 @@ const { client } = require('../backend/Database/database')
 const database = require('../backend/Database/database')
 const { MongoClient, ObjectId } = require('mongodb')
 const { connect } = require('http2')
-const Make_Payment = require('./model/Make_Payment')
+const Make_Payment = require('./Model/Make_Payment')
 const { markAsUntransferable } = require('worker_threads')
 //#endregion
 
@@ -42,6 +42,7 @@ const paymentCollection = 'Payments'
 const customerCollection = 'Customers'
 const employeeCollection = 'Payments'
 const tokens = {}; // Initialize token storage for development purposes
+let loginUserID;
 //#endregion
 
 //#region  Create Server
@@ -167,12 +168,12 @@ const mongoCustomersCollection = await db.collection(customerCollection)
 const mongoEmployeesCollection = await db.collection(employeeCollection)
 
 try {
-    const user = 
-    {
-        username: req.body.username,
-        accountNumber: req.body.accountNumber,
-        password: req.body.password
-    }        
+    const user = { 
+        username: req.body.username, 
+        accountNumber: req.body.accountNumber, 
+        password: req.body.password 
+    };
+
 
     // Check if the password meets the regex requirements
     if (passwordRegex.test(user.password)) {
@@ -180,24 +181,32 @@ try {
         // Attempt to find the user in the database
         const existingCustomer = await mongoCustomersCollection.findOne({ accountNumber: user.accountNumber }, {username: user.username})
         let userType = customerCollection
-        const existingUser = existingCustomer || existingEmployee
+        let existingUser = existingCustomer || existingEmployee //see if user is a customer or employee
 
         if(!existingCustomer)
         {
             const existingEmployee = await mongoEmployeesCollection.findOne({ accountNumber: user.accountNumber }, {username: user.username})
             userType = employeeCollection
+            existingUser = existingEmployee;
         }
 
         //If user is not present
         if (!existingUser) {
             return res.status(404).json({ message: 'User not found' });
         }
-        //If user is present, check password
-        else if (existingUser) {
-
+       
+            // Generate JWT token with userID included
            const passwordMatch = await bcrypt.compare(user.password, existingUser.password)           
 
             if (passwordMatch) {
+                const payload = {
+                    accountNumber: req.body.accountNumber,
+                    _id: existingUser._id.toString(),
+                    userType: userType,
+                    //custID: existingUser.custID // Assuming this exists in the user data
+                };
+                loginUserID = existingUser._id.toString() // Ensure the header key matches the one set by the client
+                const  _id  = loginUserID // Destructure safely
 
                 const generatedToken = jwt.sign({ email: req.body.email }, 'ThisIsTheStringThatWillBeUsedToEncryptTheTokenGenerated', { expiresIn: "20m"})
                 console.log(`Token : ${generatedToken}`)
@@ -206,14 +215,13 @@ try {
                                     email: req.body.email, 
                                     _id: existingUser._id.toString(),
                                     userType })
-            } else {
+                                    console.log(`Login Successful for ${req.body.username} ID1: {_id: ${_id}}`)
+            } 
+            else {
                 // Password doesn't match
                 res.status(401).json({ message: 'Incorrect Credentials' })
             }
-        } else {
-            // User doesn't exist
-            res.status(404).json({ message: 'Incorrect Credentials' })
-        }
+        
     } else {
         // Password doesn't meet regex requirements
         res.status(400).json({ message: 'Invalid password format' })
@@ -227,14 +235,24 @@ try {
 
 //#region Customer Payments
 
+//Verify token
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) return res.sendStatus(403);
+
+    jwt.verify(token, 'ThisIsTheStringThatWillBeUsedToEncryptTheTokenGenerated', (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user; // Store the decoded user info in req.user
+        next();
+    });
+};
+
 //Customer- Make Payment
 app.post('/make_payment',brute.prevent,
     [   //Input Sanitisation
-        /*check('paymentID').isMongoId().withMessage('Invalid payment ID'),*/
-        check('custID').isMongoId().withMessage('Invalid customer ID'),
         check('amount').isFloat({ min: 0 }).withMessage('Invalid payment amount'),
         check('currency').isLength({ min: 3, max: 3 }).withMessage('Invalid currency code'),
-        check('SWIFT').isAlphanumeric().isLength({ min: 8, max: 11 }).withMessage('Invalid SWIFT code'),
+        check('SWIFT').isAlphanumeric().isLength({ min: 8, max: 12 }).withMessage('SWIFT code must be either 8 or 12 characters'),
     ], 
     //checkAuthentication
         async(req, res)=>{
@@ -242,15 +260,21 @@ app.post('/make_payment',brute.prevent,
     //Validate Result
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+        console.error('Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
     }
 
     try{
         //Payment Constructor
-        const {custID, amount, currency, SWIFT} = req.body 
+        const { _id } = loginUserID;
+        const { amount, currency, SWIFT} = req.body 
+        const sanitizedSWIFT = SWIFT.slice(0, 12);
+        if (sanitizedSWIFT.length !== 8 && sanitizedSWIFT.length !== 11) {
+            return res.status(400).json({ errors: [{ msg: 'SWIFT code must be either 8 or 11 characters' }] });
+        }
 
         //Call to make_payment method in Payments Class
-        const result = await Make_Payment.make_payment({ custID, amount, currency, SWIFT })
+        const result = await Make_Payment.make_payment({ loginUserID ,amount, currency, sanitizedSWIFT })
         res.status(201).send(result) //return result of insersion
     }
 
@@ -262,9 +286,9 @@ app.post('/make_payment',brute.prevent,
 })
 
 //Customer- View Payments
-app.get('/:custID/payment_details', 
+app.get('/:~{loginUserID}`/payment_details', 
     //Input Sanitation
-    [check('custID').isMongoId().withMessage('Invalid customer ID')],
+    [check('loginUserID').isMongoId().withMessage('Invalid ID')],
     //Check Authentication
     checkAuthentication,
     async (req, res) => {
@@ -300,7 +324,6 @@ app.get('/view_banking_details', checkAuthentication,
         const paymentDatabase = database.db(databaseName) //Access database
         const collection = database.getDb().collection(paymentCollection);
          //Access payments table
-        //const result = await collection.find({}).toArray() //Retrieve data
         
     }
     
@@ -315,9 +338,15 @@ app.patch('/verify_payment/:paymentID',  checkAuthentication,
     check('payID').isMongoId().withMessage('Invalid customer ID'),
     async (req, res) =>{ 
     try {
-        const paymentID = req.params.paymentID
-        const result = await Make_Payment.verify_payment(paymentID)
-        res.status(200).json(result)
+        const query = {_id: new ObjectId(req.params.id)}
+        const PendingPayementsCollection = db.collection('PendingPayements')
+        const ConfirmedPayementsCollection = db.collection('ConfirmedPayements')
+        const confirmedTransaction = await PendingPayementsCollection.findOne(query)
+
+        let result = await PendingPayementsCollection.deleteOne(query)
+        await ConfirmedPayementsCollection.insertOne(confirmedTransaction)
+        
+        res.status(200).send(result)
     }
 
     catch (error) {
